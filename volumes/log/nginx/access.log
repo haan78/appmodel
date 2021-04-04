@@ -1,6 +1,0 @@
-172.20.0.1 - - [04/Apr/2021:21:27:34 +0000] "GET / HTTP/1.1" 200 693318 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0" "-"
-172.20.0.1 - - [04/Apr/2021:21:28:41 +0000] "GET / HTTP/1.1" 200 693287 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0" "-"
-172.20.0.1 - - [04/Apr/2021:21:28:45 +0000] "GET / HTTP/1.1" 200 693303 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0" "-"
-172.20.0.1 - - [04/Apr/2021:21:31:47 +0000] "GET / HTTP/1.1" 200 955695 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0" "-"
-172.20.0.1 - - [04/Apr/2021:21:31:59 +0000] "GET /login.js.map HTTP/1.1" 200 29 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0" "-"
-172.20.0.1 - - [04/Apr/2021:22:09:43 +0000] "GET / HTTP/1.1" 200 4225154 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0" "-"
