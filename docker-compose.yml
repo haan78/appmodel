@@ -1,0 +1,44 @@
+version: "3.8"
+        
+services:
+    nginx:
+        image: nginx:latest
+        depends_on:
+            - phpfpm 
+        volumes:
+            - "./nginx-default.conf:/etc/nginx/conf.d/default.conf"
+            - "./volumes/log/nginx:/var/log/nginx:rw"
+            - "./dist/assets:/app/assets"
+            - "./dist/fonts:/app/fonts"
+            - "./dist/index.php:/app/index.php"
+        ports:
+            - "80:80"
+    phpfpm:
+        build:
+            context: ./
+            dockerfile: php-fpm-dockerfile
+        volumes:
+            - "./dist/private:/app/private"
+            - "./dist/index.php:/app/index.php"
+            - "./session_redis.ini:/etc/php7/conf.d/session_redis.ini"
+        ports:
+            - "9000:9000"
+    redis:
+        image: redis:latest
+        volumes:
+            - "./volumes/redis:/data:rw"
+        expose: 
+            - "6379"
+        ports:
+            - "6379:6379"
+    maria:
+        image: mariadb:latest
+        environment:
+            MYSQL_ROOT_PASSWORD: "40801772"
+        volumes:
+            - "./src/sql/init/maria_master:/docker-entrypoint-initdb.d"
+            - "./volumes/db:/var/lib/mysql:rw"
+        expose: 
+            - "3306"
+        ports:
+            - "3306:3306"
