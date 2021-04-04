@@ -1,0 +1,2 @@
+2021/04/04 21:31:47 [warn] 28#28: *7 an upstream response is buffered to a temporary file /var/cache/nginx/fastcgi_temp/1/00/0000000001 while reading upstream, client: 172.20.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "fastcgi://172.20.0.4:9000", host: "localhost"
+2021/04/04 22:09:43 [warn] 28#28: *11 an upstream response is buffered to a temporary file /var/cache/nginx/fastcgi_temp/2/00/0000000002 while reading upstream, client: 172.20.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "fastcgi://172.20.0.4:9000", host: "localhost"
