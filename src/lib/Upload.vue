@@ -1,34 +1,32 @@
 <template>
-    <label style="cursor: pointer;" :title="title">
-      
-      <input
-        ref="uploadField"
-        type="file"
-        @change="change()"
-        style="display: none"
-        :accept="accept"
-      />
-      <span style="displa">&#128228;&nbsp;{{ caption }}</span>
-    </label>
+  <label style="cursor: pointer" :title="title">
+    <input
+      ref="uploadField"
+      type="file"
+      @change="change()"
+      style="display: none"
+      :accept="accept"
+    />
+    <span style="displa">&#128228;&nbsp;{{ caption }}</span>
+  </label>
 </template>
 
 <style scoped>
-  label {
-    
-    background-color: white;
-    
-    font-size: small;
-  }
-  label span:hover {
-    border-color: dodgerblue;
-  }
+label {
+  background-color: white;
+}
+label span:hover {
+  border-color: dodgerblue;
+}
 
-  label span  {
-    display: inline;
-    padding: 0.5em;
-    border: 2px solid black;
-    display: inline-block;
-  }
+label span {
+  font-size: small;
+  color: black;
+  display: inline;
+  padding: 0.5em;
+  border: 2px solid black;
+  display: inline-block;
+}
 </style>
 
 <script>
@@ -44,20 +42,19 @@ export default {
     },
     title: {
       type: String,
-      default: null
+      default: null,
     },
-    caption:{
+    caption: {
       type: String,
-      default:""
+      default: "",
     },
-    accept:{
+    accept: {
       type: String,
-      default: "*/*"
-    }
+      default: "*/*",
+    },
   },
   data() {
-    return {
-    };
+    return {};
   },
   emits: ["request"],
   methods: {
@@ -71,14 +68,14 @@ export default {
           fileNames.push(input.files[i].name);
           formData.append(self.fieldPrefix + (i + 1), input.files[i]);
         }
-        self.$emit("request", self.factory(formData,fileNames));
+        self.$emit("request", self.factory(formData, fileNames));
       }
     },
-    factory(formData,fileNames) {
+    factory(formData, fileNames) {
       return {
         limit: this.limit,
         formData: formData,
-        "fileNames": fileNames,
+        fileNames: fileNames,
         send(url, data, callback) {
           if (typeof data === "object" && data !== null) {
             var count = 0;
@@ -86,8 +83,8 @@ export default {
               this.formData.append(k, data[k]);
               count++;
               if (count > this.limit) {
-                if ( typeof callback === "function" ) {
-                  callback(new Error("Maximum file limit is "+this.limit));
+                if (typeof callback === "function") {
+                  callback(new Error("Maximum file limit is " + this.limit));
                 }
                 return;
               }
