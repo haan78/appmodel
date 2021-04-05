@@ -7,7 +7,7 @@
       style="display: none"
       :accept="accept"
     />
-    <span style="displa">&#128228;&nbsp;{{ caption }}</span>
+    <span>&#128228;&nbsp;{{ caption }}</span>
   </label>
 </template>
 

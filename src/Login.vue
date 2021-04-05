@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-button type="success">This is login</el-button>
-    <upload @request="request" caption="Yüklemek için tıklayın" title="Lütfen bir dosya seçiniz"></upload>
+    <upload @request="request" caption="Yüklemek için tıklayın" title="Lütfen bir dosya seçiniz"/>
   </div>
   
 </template>
