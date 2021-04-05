@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-button type="success">This is login</el-button>
-    <upload @request="request" caption="Yüklemek için tıklayın" title="Lütfen bir dosya seçiniz"/>
+    <upload @request="request" title="Lütfen bir dosya seçiniz"><i class="el-icon-upload"></i>Yükle</upload>
   </div>
   
 </template>
@@ -14,7 +14,11 @@ export default {
   name: 'Login',
   methods:{
     request(req) {
-      req.send("/upload",{"name":"Selam"},response=>{console.log(response)});
+      req.send("/upload",{"name":"Selam","id":213},
+      (response,type)=>{
+        console.log( response )
+        console.log(type);
+      });
     }
   }
 }

@@ -1,3 +1,5 @@
 <?php
-print_r($_FILES);
-print_r($_POST);
+
+
+header("Content-Type: application/json; charset=utf8");
+echo json_encode( [ "POST"=> $_POST, "FILES"=>$_FILES ] );

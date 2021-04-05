@@ -7,26 +7,29 @@
       style="display: none"
       :accept="accept"
     />
-    <span>&#128228;&nbsp;{{ caption }}</span>
+    <slot></slot>
   </label>
 </template>
+<style lang="scss" scoped>
+$colorhover : dodgerblue;
+$colorfront : black;
+$colorback : white;
+$minborder : 0.1em;
 
-<style scoped>
 label {
-  background-color: white;
+  background-color: $colorback;
   display: inline-block;
-}
-label span:hover {
-  border-color: dodgerblue;
-}
+  font-size: 14px;
+  white-space: nowrap;
+  color: $colorfront;
+  padding: 5 * $minborder;
+  border: $minborder solid $colorfront;
+  border-radius: 7 * $minborder;
 
-label span {
-  font-size: small;
-  color: black;
-  display: inline;
-  padding: 0.5em;
-  border: 2px solid black;
-  display: inline-block;
+  &:hover {
+    border-color: $colorhover;
+    color: $colorhover;
+  }
 }
 </style>
 
@@ -35,7 +38,7 @@ export default {
   props: {
     fieldPrefix: {
       type: String,
-      default: "file_",
+      default: "file",
     },
     limit: {
       type: Number,
@@ -44,10 +47,6 @@ export default {
     title: {
       type: String,
       default: null,
-    },
-    caption: {
-      type: String,
-      default: "",
     },
     accept: {
       type: String,
@@ -62,16 +61,24 @@ export default {
     change() {
       let self = this;
       var input = self.$refs.uploadField;
-      var fileNames = [];
+      
       if ( input.files.length > self.limit ) {
         self.$emit("error",new Error("Maximum file upload limit is "+self.limit));
       }
+      
       if (input.files.length > 0) {
+        var fileNames = [];
         const formData = new FormData();
-        for (var i = 0; i < input.files.length; i++) {
-          fileNames.push(input.files[i].name);
-          formData.append(self.fieldPrefix + (i + 1), input.files[i]);
+        if ( input.files.length > 1 ) {
+          for (var i = 0; i < input.files.length; i++) {
+            fileNames.push(input.files[i].name);
+            formData.append(self.fieldPrefix + (i + 1), input.files[i]);
+          }
+        } else { //if its is only one
+          fileNames.push(input.files[0].name);
+          formData.append(self.fieldPrefix, input.files[0]);
         }
+        
         self.$emit("request", self.factory(formData, fileNames));
       }
     },
@@ -82,7 +89,6 @@ export default {
         fileNames: fileNames,
         send(url, data, callback) {
           if (typeof data === "object" && data !== null) {
-            var count = 0;
             for (var k in data) {
               this.formData.append(k, data[k]);
             }
@@ -91,7 +97,7 @@ export default {
           if (typeof callback === "function") {
             request.onreadystatechange = function () {
               if (this.readyState == 4 && this.status == 200) {
-                callback(this.responseText);
+                callback(this.response,this.responseType);
               }
             };
             request.open("POST", url, true);
