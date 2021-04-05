@@ -8,7 +8,7 @@
 
 <script>
 import 'element-plus/lib/theme-chalk/index.css'
-import upload from './lib/Upload.vue';
+import upload from './lib/UploadBtn.vue';
 export default {
   components:{upload},
   name: 'Login',
