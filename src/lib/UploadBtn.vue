@@ -14,6 +14,7 @@
 <style scoped>
 label {
   background-color: white;
+  display: inline-block;
 }
 label span:hover {
   border-color: dodgerblue;
@@ -56,12 +57,15 @@ export default {
   data() {
     return {};
   },
-  emits: ["request"],
+  emits: ["request","error"],
   methods: {
     change() {
       let self = this;
       var input = self.$refs.uploadField;
       var fileNames = [];
+      if ( input.files.length > self.limit ) {
+        self.$emit("error",new Error("Maximum file upload limit is "+self.limit));
+      }
       if (input.files.length > 0) {
         const formData = new FormData();
         for (var i = 0; i < input.files.length; i++) {
@@ -81,13 +85,6 @@ export default {
             var count = 0;
             for (var k in data) {
               this.formData.append(k, data[k]);
-              count++;
-              if (count > this.limit) {
-                if (typeof callback === "function") {
-                  callback(new Error("Maximum file limit is " + this.limit));
-                }
-                return;
-              }
             }
           }
           var request = new XMLHttpRequest();
@@ -105,7 +102,7 @@ export default {
           request.send(this.formData);
         },
       };
-    },
-  },
-};
+    }
+  }
+}
 </script>
