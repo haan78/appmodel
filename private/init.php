@@ -4,12 +4,17 @@ require_once "settings.php";
 require_once "lib/Web/Web.php";
 require_once "user.php";
 require_once "vendor/autoload.php";
+require_once "page.php";
 
 use Web\Web;
 
 Web::init(function ($path) {
     if ($path == "") {
-        user::test(__DIR__ . "/js/main.js",__DIR__."/js/login.js",$path);
+        user::test(function($md){
+            page::load(ROOT,"main",$md);
+        },function($md){
+            page::load(ROOT,"login",$md);
+        },$path);
     } elseif ($path == "topla") {
         Web::jsonResponse(function ($post) {
             user::assert();

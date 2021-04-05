@@ -15,6 +15,7 @@ class User extends \Web\AuthUser {
 
     protected static function set(stdClass &$md) : bool {
         if (isset($_POST["user"])) {
+            static::sessionSet("user",$_POST["user"]);
             return true;
         } else {
             $md->message = "Wrong way!";

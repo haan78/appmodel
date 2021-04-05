@@ -8,9 +8,7 @@ services:
         volumes:
             - "./nginx-default.conf:/etc/nginx/conf.d/default.conf"
             - "./volumes/log/nginx:/var/log/nginx:rw"
-            - "./dist/assets:/app/assets"
-            - "./dist/fonts:/app/fonts"
-            - "./dist/index.php:/app/index.php"
+            - "./dist:/app"
         ports:
             - "80:80"
     phpfpm:
@@ -18,7 +16,8 @@ services:
             context: ./
             dockerfile: php-fpm-dockerfile
         volumes:
-            - "./dist/private:/app/private"
+            - "./dist:/app"
+            - "./private:/app/private"
             - "./dist/index.php:/app/index.php"
             - "./session_redis.ini:/etc/php7/conf.d/session_redis.ini"
         ports:

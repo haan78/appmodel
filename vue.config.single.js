@@ -9,24 +9,20 @@ module.exports = {
     pages: {
         main: "src/main.js",
         login: "src/login.js"
+    }
+    , css: {
+        extract: false,
     },
-
-    css: {
-        extract: { 
-            filename: '/css/[name].[hash:8].css',
-            chunkFilename: '/css/[name].[hash:8].css'
-        }
-    },
-
     configureWebpack: {
+        optimization: {
+            splitChunks: false
+        },
         output: {
-            filename: 'js/[name].[hash:8].js',
-            chunkFilename: 'js/[name].[hash:8].js'
+            filename: 'js/[name].js'
         }
     },
-
     chainWebpack: config => {
         config.plugins.delete('html-main').delete('prefetch-main').delete('preload-main');
-        config.devtool( mode == 'development' ? 'source-map' : false);
+        config.devtool( mode == 'development' ? 'inline-source-map' : false);
     }
 }

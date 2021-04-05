@@ -1,1 +1,3 @@
-<?php include "private/init.php";
+<?php
+define("ROOT",__DIR__); 
+include "private/init.php";
