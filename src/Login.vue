@@ -1,14 +1,22 @@
 <template>
   <div>
     <el-button type="success">This is login</el-button>
+    <upload @request="request"><span>Tikla</span></upload>
   </div>
   
 </template>
 
 <script>
 import 'element-plus/lib/theme-chalk/index.css'
+import upload from './lib/Upload.vue';
 export default {
-  name: 'Login'
+  components:{upload},
+  name: 'Login',
+  methods:{
+    request(req) {
+      req.send("/upload",{"name":"Selam"},response=>{console.log(response)});
+    }
+  }
 }
 </script>
 

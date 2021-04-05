@@ -22,10 +22,11 @@ namespace Web {
             $preload = "";
             $stylesheet = "";
             $script = "";
+            $rnd = uniqid();
             if (file_exists($cssdir)) {
                 $jslist = glob($cssdir . "/*.css");
                 foreach ($jslist as $f) {
-                    $basename = basename($f);
+                    $basename = basename($f)."?$rnd";
 
                     if (static::startsWith($basename, "chunk") || static::startsWith($basename, $name)) {
                         $preload .= '<link href="css/' . $basename . '" rel="preload" as="style"/>' . PHP_EOL;
@@ -36,7 +37,7 @@ namespace Web {
             if (file_exists($jsdir)) {
                 $jslist = glob($jsdir . "/*.js");
                 foreach ($jslist as $f) {
-                    $basename = basename($f);
+                    $basename = basename($f)."?$rnd";
                     if (static::startsWith($basename, "chunk") || static::startsWith($basename, $name)) {
                         $preload .= '<link href="/js/' . $basename . '" rel="preload" as="script"/>' . PHP_EOL;
                         $script .= '<script src="/js/' . $basename . '"></script>' . PHP_EOL;
