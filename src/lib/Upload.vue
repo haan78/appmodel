@@ -1,14 +1,35 @@
 <template>
-    <label style="cursor: pointer;">
+    <label style="cursor: pointer;" :title="title">
+      
       <input
         ref="uploadField"
         type="file"
         @change="change()"
         style="display: none"
+        :accept="accept"
       />
-      <slot></slot>
+      <span style="displa">&#128228;&nbsp;{{ caption }}</span>
     </label>
 </template>
+
+<style scoped>
+  label {
+    
+    background-color: white;
+    
+    font-size: small;
+  }
+  label span:hover {
+    border-color: dodgerblue;
+  }
+
+  label span  {
+    display: inline;
+    padding: 0.5em;
+    border: 2px solid black;
+    display: inline-block;
+  }
+</style>
 
 <script>
 export default {
@@ -24,28 +45,40 @@ export default {
     title: {
       type: String,
       default: null
+    },
+    caption:{
+      type: String,
+      default:""
+    },
+    accept:{
+      type: String,
+      default: "*/*"
     }
   },
   data() {
-    return {};
+    return {
+    };
   },
   emits: ["request"],
   methods: {
     change() {
       let self = this;
       var input = self.$refs.uploadField;
+      var fileNames = [];
       if (input.files.length > 0) {
         const formData = new FormData();
         for (var i = 0; i < input.files.length; i++) {
+          fileNames.push(input.files[i].name);
           formData.append(self.fieldPrefix + (i + 1), input.files[i]);
         }
-        self.$emit("request", self.factory(formData));
+        self.$emit("request", self.factory(formData,fileNames));
       }
     },
-    factory(formData) {
+    factory(formData,fileNames) {
       return {
         limit: this.limit,
         formData: formData,
+        "fileNames": fileNames,
         send(url, data, callback) {
           if (typeof data === "object" && data !== null) {
             var count = 0;
