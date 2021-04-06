@@ -42,22 +42,16 @@ namespace Web {
 
         public static function init (callable $router, ?callable $handler = null) {
             self::setErrorHandler($handler);
-            $ifiles = get_included_files();
-            if ( $ifiles[0] == "/app/index.php" ) {
-                if ( isset($_SERVER["PATH_INFO"]) && !empty($_SERVER["PATH_INFO"]) ) {
-                    $arr = explode("/",$_SERVER["PATH_INFO"]);
-                    if ( isset($arr[1]) ) {
-                        $path = $arr[1];
-                        call_user_func_array($router,[$path]);
-                    } else {
-                        throw new Exception("Nginix Path Problem 2");
-                    }
-                } else {
-                    throw new Exception("Nginix Path Problem 1");
+            $path = "";
+            if ( isset($_SERVER["PATH_INFO"]) && !empty($_SERVER["PATH_INFO"]) ) {
+                $arr = explode("/",$_SERVER["PATH_INFO"]);
+                if ( isset($arr[1]) ) {
+                    $path = $arr[1];
+                } elseif($arr[0]) {
+                    $path = trim($arr[0]);
                 }
-            } else {
-                throw new Exception("The only index file that can run");
             }
+            call_user_func_array($router,[$path]);
         }
 
         public static function jsonResponse(callable $method,?stdClass $options = null) : void

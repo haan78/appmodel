@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-button type="success">This is login</el-button>
-    <upload @request="request" title="Lütfen bir dosya seçiniz"><i class="el-icon-upload"></i>Yükle</upload>
+    <el-button type="success" icon="el-icon-upload">This is login</el-button>
+    <upload @request="request" :disabled="false" title="Lütfen bir dosya seçiniz"><i class="el-icon-upload"></i>Yükle</upload>
   </div>
   
 </template>

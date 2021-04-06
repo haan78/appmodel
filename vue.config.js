@@ -26,7 +26,9 @@ module.exports = {
     },
 
     chainWebpack: config => {
+        
         config.plugins.delete('html-main').delete('prefetch-main').delete('preload-main');
+        
         config.devtool( mode == 'development' ? 'source-map' : false);
     }
 }

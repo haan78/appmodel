@@ -17,8 +17,7 @@ services:
             dockerfile: php-fpm-dockerfile
         volumes:
             - "./dist:/app"
-            - "./private:/app/private"
-            - "./dist/index.php:/app/index.php"
+            - "./private:/private"
             - "./session_redis.ini:/etc/php7/conf.d/session_redis.ini"
         ports:
             - "9000:9000"

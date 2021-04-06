@@ -1,5 +1,7 @@
 <?php
-
+if ( !defined('ROOT') ) {
+    exit();
+}
 require_once "settings.php";
 require_once "lib/Web/Web.php";
 require_once "user.php";
