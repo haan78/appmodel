@@ -28,7 +28,7 @@ module.exports = {
     chainWebpack: config => {
         
         config.plugins.delete('html-main').delete('prefetch-main').delete('preload-main');
-        
+        config.plugins.delete('html-login').delete('prefetch-login').delete('preload-login');
         config.devtool( mode == 'development' ? 'source-map' : false);
     }
 }
