@@ -39,5 +39,5 @@ Web::init(function ($path) {
         echo "What! $path";
     }
 }, function (Exception $ex) {
-    include "error.php";
+    page::error($ex);
 });
