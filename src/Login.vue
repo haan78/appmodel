@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button type="success" icon="el-icon-upload">This is login</el-button>
+    <el-button type="success" icon="el-icon-upload" @click="get()">This is login</el-button>
     <upload @request="request" :disabled="false" title="Lütfen bir dosya seçiniz"><i class="el-icon-upload"></i>Yükle</upload>
   </div>
   
@@ -13,6 +13,12 @@ export default {
   components:{upload},
   name: 'Login',
   methods:{
+    get() {
+      let self = this;
+      self.$subutai.ajax("/server",null,response => {
+        console.log(response.data);
+      });
+    },
     request(req) {
       req.send("/upload",{"name":"Selam","id":213},
       (response,type)=>{

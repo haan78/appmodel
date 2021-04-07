@@ -4,7 +4,7 @@ namespace Web {
 
     use stdClass;
 
-    abstract class Page
+    class HTML
     {
         public static string $cssDir = "css";
         public static string $jsDir = "js";
@@ -15,7 +15,7 @@ namespace Web {
             return substr( $haystack, 0, $length ) === $needle;
         }
 
-        public static final function load($root, $name, stdClass $md): void
+        public static final function load($root, $name, stdClass $md): stdClass
         {
             $jsdir = $root . "/" . static::$jsDir;
             $cssdir = $root . "/" . static::$cssDir;
@@ -45,12 +45,8 @@ namespace Web {
                 }
             }
             $metadata = '<meta name="backend" content="'.static::buildMetaStr($md).'">';
-            ob_start();
-            static::template($preload,$stylesheet,$metadata,$script);
-            ob_end_flush();
+            return (object)[ "head"=>($preload.$stylesheet.$metadata),"body"=>$script ];
         }
-
-        protected static abstract function template($preload,$stylesheet,$metadata,$script):void;
 
         private static final function buildMetaStr(stdClass $metadata): string
         {

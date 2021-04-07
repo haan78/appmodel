@@ -14,16 +14,19 @@ namespace Web {
         protected static string $tokenField = "token";
         protected static int $expire = 40;
 
-        public static final function test( callable $success, callable $reject, string $reload): void
-        { //0 = pass, 1 = reload, 2 = reject
+        public const TEST_ACCEPT = 0;
+        public const TEST_REJECT = 1;
+        public const TEST_RELOAD = 2;
+
+        public static final function test(?stdClass &$md): int
+        { //0 = accept, 1 = reload, 2 = reject
             $md = new stdClass();
             if (static::get($md)) {
-                call_user_func_array($success,[$md]);
+                return static::TEST_ACCEPT;
             } elseif (static::set($md)) {
-                header("Refresh:0; url=/$reload");
-                return;
+                return static::TEST_RELOAD;
             } else {
-                call_user_func_array($reject,[$md]);
+                return static::TEST_REJECT;
             }
         }
 

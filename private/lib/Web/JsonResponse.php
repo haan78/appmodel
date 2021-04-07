@@ -9,6 +9,10 @@ namespace Web {
     class JsonResponse
     {
 
+        public const ERROR_FULL = 0;
+        public const ERROR_MSG = 1;
+        public const ERROR_NONE = 3;
+
         public static function perform(callable $method, stdClass $options = null)
         {
             $op = self::defaults($options);
@@ -87,7 +91,7 @@ namespace Web {
                 "charset" => ( !is_null($options) && property_exists($options, "charset") ? (string)$options->charset : "utf-8"),
                 "pretty" => ( !is_null($options) && property_exists($options, "pretty") ? (bool)$options->pretty : false),
                 "callback" => ( !is_null($options) && property_exists($options, "callback") ? (string)$options->callback : null),
-                "errorLevel" => ( !is_null($options) && property_exists($options, "errorLevel") ? (int)$options->errorLevel : ERROR_MSG)
+                "errorLevel" => ( !is_null($options) && property_exists($options, "errorLevel") ? (int)$options->errorLevel : static::ERROR_MSG)
             ];
         }
         private static function push($response,stdClass $options)
@@ -111,12 +115,12 @@ namespace Web {
         {
             $r = new stdClass();
             $r->success = false;
-            if ($options->errorLevel == ERROR_FULL) {
+            if ($options->errorLevel == static::ERROR_FULL) {
                 $r->message = $ex->getMessage();
                 $r->code = $ex->getCode();
                 $r->file = $ex->getFile();
                 $r->line = $ex->getLine();
-            } elseif ($options->errorLevel == ERROR_MSG) {
+            } elseif ($options->errorLevel == static::ERROR_MSG) {
                 $r->message = $ex->getMessage();
                 $r->code = $ex->getCode();
             }

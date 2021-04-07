@@ -1,9 +1,9 @@
 <?php
-require_once "lib/Web/Page.php";
-class page extends \Web\Page
+class page_helper
 {
-    protected static function template($preload, $stylesheet, $metadata, $script): void
+    public static function temp1(stdClass $data): void
     {
+        ob_start();
 ?>
         <!DOCTYPE html>
         <html lang="tr">
@@ -14,20 +14,22 @@ class page extends \Web\Page
             <meta http-equiv='X-UA-Compatible' content='IE=edge'>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
             <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-            <?php echo $preload . $stylesheet . $metadata; ?>
+            <?php echo $data->head; ?>
         </head>
 
         <body>
             <div id="app"></div>
-            <?php echo $script; ?>
+            <?php echo $data->body; ?>
         </body>
 
         </html>
     <?php
+        ob_end_flush();
     }
 
     public static function error(Exception $ex)
     {
+        ob_start();
     ?>
         <!DOCTYPE html>
         <html>
@@ -49,5 +51,6 @@ class page extends \Web\Page
             </ul>
         </body>
 <?php
+        ob_end_flush();
     }
 }

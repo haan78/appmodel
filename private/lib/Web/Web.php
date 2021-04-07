@@ -2,18 +2,15 @@
 
 namespace Web {
 
-    const ERROR_FULL = 0;
-    const ERROR_MSG = 1;
-    const ERROR_NONE = 3;
+    
 
     use ErrorException;
-    use Exception;
     use stdClass;
 
     class Web
     {
 
-        private static function setErrorHandler(?callable $fnc = null)
+        public static function errorHandler(?callable $fnc = null)
         {
             error_reporting(E_ALL);
             //ini_set('display_errors', TRUE);
@@ -40,30 +37,17 @@ namespace Web {
             }, E_ALL);
         }
 
-        public static function init (callable $router, ?callable $handler = null) {
-            self::setErrorHandler($handler);
-            $path = "";
+        public static function action() {
+            $action = "";
             if ( isset($_SERVER["PATH_INFO"]) && !empty($_SERVER["PATH_INFO"]) ) {
                 $arr = explode("/",$_SERVER["PATH_INFO"]);
                 if ( isset($arr[1]) ) {
-                    $path = $arr[1];
+                    $action = $arr[1];
                 } elseif($arr[0]) {
-                    $path = trim($arr[0]);
+                    $action = trim($arr[0]);
                 }
             }
-            call_user_func_array($router,[$path]);
-        }
-
-        public static function jsonResponse(callable $method,?stdClass $options = null) : void
-        {
-            require_once __DIR__ . '/JsonResponse.php';
-            JsonResponse::perform($method,$options);
-        }
-
-        public static function upload(string $folder, ?stdClass $options = null) : void
-        {
-            require_once __DIR__ . '/Upload.php';
-            Upload::perform($folder,$options);
+            return $action;
         }
     }
 }
