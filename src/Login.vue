@@ -12,11 +12,21 @@ import upload from './lib/UploadBtn.vue';
 export default {
   components:{upload},
   name: 'Login',
+  data() {
+    return {
+      list:[]
+    }
+  },
+  created() {
+    console.log(this.$subutai);
+    this.$subutai.init();
+    console.log(this.$subutai.metaData);
+  },
   methods:{
     get() {
       let self = this;
       self.$subutai.ajax("/server",null,response => {
-        console.log(response.data);
+        console.log(response);
       });
     },
     request(req) {

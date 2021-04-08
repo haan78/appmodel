@@ -15,7 +15,7 @@ namespace Web {
             return substr( $haystack, 0, $length ) === $needle;
         }
 
-        public static final function load($root, $name, stdClass $md): stdClass
+        public static final function load($root, $name, stdClass $md,$ticket = false): stdClass
         {
             $jsdir = $root . "/" . static::$jsDir;
             $cssdir = $root . "/" . static::$cssDir;

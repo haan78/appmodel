@@ -21,6 +21,7 @@ namespace Web {
         public static final function test(?stdClass &$md): int
         { //0 = accept, 1 = reload, 2 = reject
             $md = new stdClass();
+            $md->__TICKET__ = static::sevaTicket();
             if (static::get($md)) {
                 return static::TEST_ACCEPT;
             } elseif (static::set($md)) {
@@ -39,6 +40,20 @@ namespace Web {
                     throw new Exception("Header has been sent before $hf / $hl");
                 }
             }
+        }
+
+        private static function sevaTicket() : string {
+            $t = hash( "sha256", date("YmdHis") . uniqid() . rand(1,177) );
+            static::sessionStart();
+            $_SESSION["_TICKET_"] = $t;
+            return $t;
+        }
+
+        public static function testTicket() : bool {
+            if ( isset($_SERVER["HTTP_TICKET"]) ) {
+                return ( $_SERVER["HTTP_TICKET"] ==  static::sessionGet("_TICKET_"));
+            }
+            return false;
         }
 
         public static function sessionGet(string $name, $default = null)

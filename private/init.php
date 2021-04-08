@@ -30,7 +30,11 @@ if ($path == "") {
     }
 } elseif ($path == "server") {
     JsonResponse::perform(function () {
-        return $_SERVER;
+        if (user::testTicket()) {
+            return $_SERVER;
+        } else {
+            throw new Exception("You shall not pass!");
+        }        
     }, (object)["pretty" => true]);
 } elseif ($path == "topla") {
     JsonResponse::perform(function ($post) {
@@ -50,6 +54,8 @@ if ($path == "") {
     $c->output();
 } elseif ($path == "upload") {
     include "upload.php";
+} elseif($path == "cros") {
+    include "cros.php";
 } else {
     throw new Exception("There is no action like $path");
 }

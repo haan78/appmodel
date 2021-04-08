@@ -1,7 +1,8 @@
-import axios from "axios"
+import axios from "axios";
+import jwt from "jsonwebtoken";
 export default {
     ajaxActivationCount:0,
-
+    metaData:null,
     isLoading() {
         return this.ajaxActivationCount > 0;
     },
@@ -9,13 +10,19 @@ export default {
     defaultError(msg,details) {
         console.log(details);
     },
+    
+    init() {
+        this.metaData=this.meta(jwt);
+    },
 
     ajax(url,data,onSuccess,onError) {
             
         let self = this;
+        let config = { headers:{ "TICKET": self.metaData.__TICKET__ }}; 
+        console.log(config);
         var err = ( typeof onError === "function" ? onError : self.defaultError );
         self.ajaxActivationCount += 1;
-        axios.post(url,(data ? data : null )).then( (response)=>{
+        axios.post(url,(data ? data : null ),config).then( (response)=>{
             if (self.ajaxActivationCount>0) {
                 self.ajaxActivationCount -= 1;
             } 
