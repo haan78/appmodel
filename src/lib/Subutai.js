@@ -19,7 +19,6 @@ export default {
             
         let self = this;
         let config = { headers:{ "TICKET": self.metaData.__TICKET__ }}; 
-        console.log(config);
         var err = ( typeof onError === "function" ? onError : self.defaultError );
         self.ajaxActivationCount += 1;
         axios.post(url,(data ? data : null ),config).then( (response)=>{
