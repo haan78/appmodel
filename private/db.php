@@ -2,20 +2,31 @@
 require_once "lib/MySqlTool/MySqlToolCall.php";
 
 class db {
-    public static function connection(?string $schema = DB_SCHEMA) {
+    private static $mongodb = null;
+    public static function maria() {
         $link = mysqli_init();
         mysqli_options($link, MYSQLI_OPT_CONNECT_TIMEOUT, 20);
-        mysqli_real_connect($link);
-        if ( !is_null($schema) ) {
-            mysqli_select_db($link, $schema);
-        }        
+        mysqli_real_connect($link,MARIA_HOST,MARIA_USER,MARIA_PASS,MARIA_SCHEMA,MARIA_PORT);        
         mysqli_set_charset($link, "utf8");
         return $link;
     }
 
-    public static function adapter() : \MySqlTool\MySqlToolCall {
-        $link = self::connection();
-        $c = new \MySqlTool\MySqlToolCall($link);
-        return $c;
+    public static function prc() {
+        $link = self::maria();
+        require_once "lib/MySqlTool/MySqlToolCall.php";
+        return new \MySqlTool\MySqlToolCall($link);
+    }
+
+    public static function mongo() {
+        if (is_null(self::$mongodb)) {
+            self::$mongodb = new \MongoDB\Client(MONGO_CONNECTION_STRING);
+        }
+        return self::$mongodb;
+    }
+
+    public static function log(string $db, string $coll, array $logData) {
+        $data = $logData;
+        $data["localTime"] = date("Y-m-d H:i:s");
+        self::mongo()->selectDatabase($db)->selectCollection($coll)->insertOne($data);
     }
 }

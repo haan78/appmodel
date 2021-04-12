@@ -36,7 +36,7 @@ services:
             - "6379"
         ports:
             - "6379:6379"
-    maria:
+    mariadb:
         image: mariadb:latest
         environment:
             TZ: "Asia/Istanbul"

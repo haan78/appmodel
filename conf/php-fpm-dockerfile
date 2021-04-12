@@ -24,5 +24,5 @@ COPY ./php-fpm-ex.conf /etc/php7/php-fpm.conf
 COPY ./composer.init.sh /composer.init.sh
 
 EXPOSE 9000
-##CMD sh /composer.init.sh
+##CMD "sh /composer.init.sh"
 ENTRYPOINT ["php-fpm7", "-F"]
