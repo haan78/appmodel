@@ -9,7 +9,6 @@ namespace Web {
 
     class Web
     {
-
         public static function errorHandler(?callable $fnc = null)
         {
             error_reporting(E_ALL);
@@ -37,17 +36,18 @@ namespace Web {
             }, E_ALL);
         }
 
-        public static function action() {
+        public static function path() : array {
             $action = "";
             if ( isset($_SERVER["PATH_INFO"]) && !empty($_SERVER["PATH_INFO"]) ) {
                 $arr = explode("/",$_SERVER["PATH_INFO"]);
                 if ( isset($arr[1]) ) {
                     $action = $arr[1];
-                } elseif($arr[0]) {
+                } else {
                     $action = trim($arr[0]);
                 }
             }
-            return $action;
+            $path = explode('-',$action);
+            return $path;
         }
     }
 }

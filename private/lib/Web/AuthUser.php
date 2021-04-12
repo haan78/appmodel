@@ -45,13 +45,13 @@ namespace Web {
         private static function sevaTicket() : string {
             $t = hash( "sha256", date("YmdHis") . uniqid() . rand(1,177) );
             static::sessionStart();
-            $_SESSION["_TICKET_"] = $t;
+            $_SESSION["HTTP_TICKET"] = $t;
             return $t;
         }
 
         public static function testTicket() : bool {
             if ( isset($_SERVER["HTTP_TICKET"]) ) {
-                return ( $_SERVER["HTTP_TICKET"] ==  static::sessionGet("_TICKET_"));
+                return ( $_SERVER["HTTP_TICKET"] ==  static::sessionGet("HTTP_TICKET"));
             }
             return false;
         }
@@ -81,10 +81,10 @@ namespace Web {
         }
         protected abstract static function set(stdClass &$metaData): bool;
         protected abstract static function get(stdClass &$metaData): bool;
-        public static function assert(string $message = "Auth Faild!")
+        public static function assert(string $message = "You shall not pass!")
         {
             $md = new stdClass();
-            if (!static::get($md)) {
+            if ( !static::testTicket() || !static::get($md) ) {
                 throw new Exception($message);
             }
         }

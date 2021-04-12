@@ -30,7 +30,7 @@ export default {
       });
     },
     request(req) {
-      req.send("/upload",{"name":"Selam","id":213},
+      req.send("/mongo",{"name":"Selam","id":213},
       (response,type)=>{
         console.log( response )
         console.log(type);

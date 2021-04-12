@@ -123,6 +123,7 @@ export default {
       }
     },
     factory(formData, fileNames) {
+      let self = this;
       return {
         limit: this.limit,
         formData: formData,
@@ -137,6 +138,7 @@ export default {
           if (typeof callback === "function") {
             request.onreadystatechange = function () {
               if (this.readyState == 4 && this.status == 200) {
+                self.$refs.uploadField.value = null;
                 callback(this.response, this.responseType);
               }
             };

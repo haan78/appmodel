@@ -13,19 +13,36 @@ namespace Web {
         public const ERROR_MSG = 1;
         public const ERROR_NONE = 3;
 
-        public static function perform(callable $method, stdClass $options = null)
+        private static array $options = [
+            "charset"=>"utf-8",
+            "pretty" => false,
+            "jsonbCallBack" =>null,
+            "errorLevel" => 1
+        ];
+
+        public static function setOptions(array $options) {
+            $keys = array_keys(static::$options);
+            for($i=0; $i<count($keys); $i++) {
+                $key = $keys[$i];
+                if (array_key_exists($key,$options)) {
+                    static::$options[$key] = $options[$key];
+                }
+            }
+        }
+
+
+        public static function perform(callable $method)
         {
-            $op = self::defaults($options);
             $response = null;
-            try {
+            try {                
                 $response = new stdClass();
                 $response->success = true;
                 $params = self::generateParams($method);
                 $response->data = call_user_func_array($method, $params);
             } catch (Exception $ex) {
-                $response = self::error($ex,$op);
+                $response = self::error($ex);
             }
-            self::push($response,$op);
+            self::push($response);
         }
 
         private static function generateParams(callable $method): array
@@ -85,24 +102,15 @@ namespace Web {
             }
         }
 
-        private static function defaults(?stdClass $options)
+        private static function push($response)
         {
-            return (object)[
-                "charset" => ( !is_null($options) && property_exists($options, "charset") ? (string)$options->charset : "utf-8"),
-                "pretty" => ( !is_null($options) && property_exists($options, "pretty") ? (bool)$options->pretty : false),
-                "callback" => ( !is_null($options) && property_exists($options, "callback") ? (string)$options->callback : null),
-                "errorLevel" => ( !is_null($options) && property_exists($options, "errorLevel") ? (int)$options->errorLevel : static::ERROR_MSG)
-            ];
-        }
-        private static function push($response,stdClass $options)
-        {
-            $charset = $options->charset;
+            $charset = static::$options["charset"];
             if (headers_sent($filename, $linenum)) {
                 $msg = "Headers already sent in $filename on line $linenum";
                 throw new Exception($msg);
             }
-            $json = json_encode($response, ($options->pretty ? JSON_PRETTY_PRINT : 0));
-            $cb = $options->callback;
+            $json = json_encode($response, ( static::$options["pretty"] ? JSON_PRETTY_PRINT : 0));
+            $cb = static::$options["jsonbCallBack"];
             if (!is_null($cb)) {
                 header("Content-Type: application/javascript; charset=$charset");
                 echo "$cb($json);";
@@ -111,16 +119,17 @@ namespace Web {
                 echo $json;
             }
         }
-        private static function error(Exception $ex,stdClass $options)
+        
+        private static function error(Exception $ex)
         {
             $r = new stdClass();
             $r->success = false;
-            if ($options->errorLevel == static::ERROR_FULL) {
+            if (static::$options["errorLevel"] == static::ERROR_FULL) {
                 $r->message = $ex->getMessage();
                 $r->code = $ex->getCode();
                 $r->file = $ex->getFile();
                 $r->line = $ex->getLine();
-            } elseif ($options->errorLevel == static::ERROR_MSG) {
+            } elseif (static::$options["errorLevel"] == static::ERROR_MSG) {
                 $r->message = $ex->getMessage();
                 $r->code = $ex->getCode();
             }

@@ -2,7 +2,7 @@
     "description": "Apptemp Copmoser items",
     "name":"baris/appmodel2",
     "config": {
-        "vendor-dir": "./public/private/vendor"
+        "vendor-dir": "/private/vendor"
     },
 
     "require": {
@@ -11,6 +11,7 @@
         "dompdf/dompdf":"0.8.2",
         "gregwar/captcha": "1.*",
         "abeautifulsite/simple-php-captcha": "^1.0",
-        "firebase/php-jwt": "^5.2"
+        "firebase/php-jwt": "^5.2",
+        "mongodb/mongodb": "^1.8"
     }
 }

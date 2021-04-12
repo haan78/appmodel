@@ -1,6 +1,10 @@
 FROM alpine:20200917
+RUN apk --update add curl git php7
+RUN apk add php7-phar php7-fpm php7-json php7-curl php7-mbstring php7-fileinfo
+RUN apk add php7-zip php7-gd php7-ctype php7-xml php7-dom php7-iconv php7-simplexml php7-xmlreader php7-xmlwriter
+RUN apk add php7-sqlite3 php7-mysqli php7-pgsql php7-redis php7-mongodb
 
-RUN apk --update add php7 php7-fpm php7-sqlite3 php7-json php7-curl php7-mysqli php7-pgsql php7-zip php7-mbstring php7-fileinfo php7-redis php7-gd
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
@@ -17,8 +21,8 @@ RUN apk del tzdata
 RUN rm -rf /var/cache/apk/*
 RUN mkdir /app
 COPY ./php-fpm-ex.conf /etc/php7/php-fpm.conf
-
+COPY ./composer.init.sh /composer.init.sh
 
 EXPOSE 9000
-
+##CMD sh /composer.init.sh
 ENTRYPOINT ["php-fpm7", "-F"]

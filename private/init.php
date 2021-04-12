@@ -17,16 +17,16 @@ use Web\JsonResponse;
 Web::errorHandler(function (Exception $ex) {
     page_helper::error($ex);
 });
-$path = Web::action();
+$path = Web::path()[0];
 
 if ($path == "") {
     $t = user::test($md);
     if ($t === user::TEST_ACCEPT) {
-        page_helper::temp1(HTML::load(ROOT, "main", $md));
+        page_helper::temp1(HTML::generate(ROOT, "main", $md));
     } elseif ($t === user::TEST_RELOAD) {
         header("Refresh:0; url=/$path");
     } else { //TEST_REJECT
-        page_helper::temp1(HTML::load(ROOT, "login", $md));
+        page_helper::temp1(HTML::generate(ROOT, "login", $md));
     }
 } elseif ($path == "server") {
     JsonResponse::perform(function () {
@@ -56,6 +56,10 @@ if ($path == "") {
     include "upload.php";
 } elseif($path == "cros") {
     include "cros.php";
-} else {
+} elseif ($path=="info") {
+    phpinfo();
+} elseif($path=="mongo") {
+    include "mongo.php";
+}else {
     throw new Exception("There is no action like $path");
 }
