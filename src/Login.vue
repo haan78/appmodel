@@ -18,9 +18,7 @@ export default {
     }
   },
   created() {
-    console.log(this.$subutai);
     this.$subutai.init();
-    console.log(this.$subutai.metaData);
   },
   methods:{
     get() {

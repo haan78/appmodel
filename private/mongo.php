@@ -13,6 +13,7 @@ if ( !empty($_FILES) ) {
     $data = $_POST;
     $data["_id"] = $id;
     print_r($data);
+    //db::log("Test1","LogUpload",["session"=>$_SESSION, "files_id"=>$id]);
 } elseif(!is_null($id)) {
     #\Web\MongoUpload::download($bucket,$id);
     $c = \Web\MongoUpload::get($bucket,$id,$ft);

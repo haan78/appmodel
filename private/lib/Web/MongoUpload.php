@@ -32,8 +32,7 @@ namespace Web {
             if (empty($_FILES)) {
                 throw new Exception("There is no upload file");
             } else {
-                $count = array_keys($_FILES);
-                if ( $count > static::$maxUploadCount ) {
+                if ( count( array_keys($_FILES) ) > static::$maxUploadCount ) {
                     throw new Exception("Maximum upload limit is ".static::$maxUploadCount." files");
                 }
                 $total = 0;

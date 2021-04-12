@@ -27,6 +27,7 @@ class db {
     public static function log(string $db, string $coll, array $logData) {
         $data = $logData;
         $data["localTime"] = date("Y-m-d H:i:s");
+        $data["remoteAddr"] = ( isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : null );
         self::mongo()->selectDatabase($db)->selectCollection($coll)->insertOne($data);
     }
 }

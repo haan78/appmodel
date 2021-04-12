@@ -7,6 +7,7 @@ require_once "lib/Web/HTML.php";
 require_once "lib/Web/JsonResponse.php";
 require_once "vendor/autoload.php";
 require_once "user.php";
+require_once "db.php";
 require_once "page_helper.php";
 require_once "settings.php";
 
@@ -28,13 +29,15 @@ if ($path == "") {
     } else { //TEST_REJECT
         page_helper::temp1(HTML::generate(ROOT, "login", $md));
     }
+    db::log("Test1","LogHTML",["test"=>$t,"session"=>$_SESSION]);
 } elseif ($path == "server") {
     JsonResponse::perform(function () {
         if (user::testTicket()) {
+            db::log("Test1","LogAJAX",["method"=>"server","session"=>$_SESSION]);   
             return $_SERVER;
         } else {
             throw new Exception("You shall not pass!");
-        }        
+        }            
     }, (object)["pretty" => true]);
 } elseif ($path == "topla") {
     JsonResponse::perform(function ($post) {
