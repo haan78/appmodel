@@ -4,7 +4,7 @@ namespace Web {
 
     use stdClass;
 
-    class HTML
+    class Vue
     {
         public static string $cssDir = "css";
         public static string $jsDir = "js";
@@ -15,22 +15,23 @@ namespace Web {
             return substr( $haystack, 0, $length ) === $needle;
         }
 
-        public static final function generate($root, $name, stdClass $md,$ticket = false): stdClass
+        public static final function scriptList($root, $name, stdClass $md): array
         {
             $jsdir = $root . "/" . static::$jsDir;
             $cssdir = $root . "/" . static::$cssDir;
-            $preload = "";
-            $stylesheet = "";
-            $script = "";
             $rnd = uniqid();
+            $list = [];
+            $str = static::buildMetaStr($md);
+            array_push($list,[ "stage"=>"beckend", "type"=>"meta", "script" => null, "code"=>'<meta name="backend" content="'.$str.'">'  ]);
+            
             if (file_exists($cssdir)) {
                 $jslist = glob($cssdir . "/*.css");
                 foreach ($jslist as $f) {
                     $basename = basename($f)."?$rnd";
 
                     if (static::startsWith($basename, "chunk") || static::startsWith($basename, $name)) {
-                        $preload .= '<link href="css/' . $basename . '" rel="preload" as="style"/>' . PHP_EOL;
-                        $stylesheet .= '<link href="css/' . $basename . '" rel="stylesheet">' . PHP_EOL;
+                        array_push($list,["stage"=>"preload", "type"=>"css","script"=>"css/$basename", "code"=> '<link href="css/' . $basename . '" rel="preload" as="style"/>']);
+                        array_push($list,["stage"=>"stylesheet","type"=>"css","script"=>"css/$basename", "code" => '<link href="css/' . $basename . '" rel="stylesheet"/>']);
                     }
                 }
             }
@@ -39,13 +40,13 @@ namespace Web {
                 foreach ($jslist as $f) {
                     $basename = basename($f)."?$rnd";
                     if (static::startsWith($basename, "chunk") || static::startsWith($basename, $name)) {
-                        $preload .= '<link href="/js/' . $basename . '" rel="preload" as="script"/>' . PHP_EOL;
-                        $script .= '<script src="/js/' . $basename . '"></script>' . PHP_EOL;
+                        array_push($list,["stage"=>"preload", "type"=>"js","script"=>"css/$basename", "code"=> '<link href="/js/' . $basename . '" rel="preload" as="script"/>' ]);
+                        array_push($list,["stage"=>"body","type"=>"js","script"=>"css/$basename", "code"=> '<script src="/js/' . $basename . '"></script>']);
                     }
                 }
             }
-            $metadata = '<meta name="backend" content="'.static::buildMetaStr($md).'">';
-            return (object)[ "head"=>($preload.$stylesheet.$metadata),"body"=>$script ];
+
+            return $list;
         }
 
         private static final function buildMetaStr(stdClass $metadata): string

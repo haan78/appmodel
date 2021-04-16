@@ -1,8 +1,19 @@
 <?php
 class page_helper
 {
-    public static function temp1(stdClass $data): void
+    public static function temp1(array $list): void
     {
+
+        $head = "";
+        $body = "";
+        for($i=0; $i<count($list); $i++) {
+            if ( $list[$i]["stage"]=="body" ) {
+                $body.=$list[$i]["code"].PHP_EOL;
+            } else {
+                $head.=$list[$i]["code"].PHP_EOL;
+            }            
+        }
+
         ob_start();
 ?>
         <!DOCTYPE html>
@@ -14,12 +25,19 @@ class page_helper
             <meta http-equiv='X-UA-Compatible' content='IE=edge'>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
             <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-            <?php echo $data->head; ?>
+            <?php echo $head; ?>
         </head>
 
-        <body>
+        <body onload="ready()">
             <div id="app"></div>
-            <?php echo $data->body; ?>
+            <div id="load" style="display: none;">Please stand by...<div>
+            <script>
+                function ready() {
+                    document.getElementById("load").remove();
+                    document.getElementById("app").style.display = "block";                    
+                } 
+            </script>
+            <?php echo $body; ?>
         </body>
 
         </html>
@@ -27,7 +45,7 @@ class page_helper
         ob_end_flush();
     }
 
-    public static function error(Exception $ex)
+    public static function errorHTML(Exception $ex)
     {
         ob_start();
     ?>
@@ -52,5 +70,10 @@ class page_helper
         </body>
 <?php
         ob_end_flush();
+    }
+
+    public static function json($data) {
+        header("Content-Type: application/json; charset=utf-8");
+        echo json_encode($data);
     }
 }
