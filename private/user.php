@@ -1,34 +1,49 @@
 <?php
 
-require_once "lib/Web/AuthUser.php";
-use \Web\Web;
-use \Web\AuthUser;
+require_once "lib/Web/Webpack.php";
+require_once "lib/Web/Ticket.php";
+require_once "lib/Web/Session.php";
 
-class User extends AuthUser {
-    protected static function get(stdClass &$md) : bool {      
-        if (Web::sessionGet("user",false)) {
-            $md->time = date("Y-m-d H:i:s");            
-            $md->user = Web::sessionGet("user",false);
-            return true;
+use \Web\Ticket;
+use \Web\SessionDefault;
+
+class User {
+    public static function get() {
+
+        $md = [];
+
+        $user = (new SessionDefault())->get("user");
+        if ($user) {
+            $md["time"] = date("Y-m-d H:i:s");
+            $md["user"] = $user;
+            return $md;
         } else {
             return false;
         }
     }
 
-    protected static function set(stdClass &$md) : bool {
+    public static function set(): bool {
         if (isset($_POST["user"])) {
-            Web::sessionSet("user",$_POST["user"]);
+            $s = new SessionDefault();
+            $s->clear();
+            $s->set("user", $_POST["user"]);
             return true;
         } else {
-            $md->message = "Wrong way!";
             return false;
         }
     }
 
-    public static function assert() {
-        $md = new stdClass();
-        if ( !self::get($md) ) {
-            throw new Exception("Authentication failed");
-        }
+    public static function kill() {
+        $s = new SessionDefault();
+        $s->kill();
+    }
+
+    public static function test_login(): bool {
+        return self::get();
+    }
+
+    public static function test_ticket(): bool {
+        $t = new Ticket(new SessionDefault());
+        return $t->pass();
     }
 }

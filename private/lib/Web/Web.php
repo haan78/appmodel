@@ -17,10 +17,6 @@ define("HTTP_TICKET","HTTP_TICKET");
                 "line" => $this->getLine()
             ];
         }
-
-        public function hasTicketSent() {
-            return isset($_SERVER[HTTP_TICKET]);
-        }
     }
 
     interface Page {
@@ -49,6 +45,10 @@ define("HTTP_TICKET","HTTP_TICKET");
                 self::$path_info = [];
             }
             return self::$path_info;
+        }
+
+        public static function path(int $index = 0) : string {
+            return isset(self::pathinfo()[$index]) ? self::pathinfo()[$index] : "";
         }
 
         public static function errorHandler(callable $fnc = null)
@@ -94,71 +94,18 @@ define("HTTP_TICKET","HTTP_TICKET");
             }
         }
 
-        private static function sessionStart()
-        {
-            if (!isset($_SESSION)) {
-                if (!headers_sent($hf, $hl)) {
-                    session_start();
-                } else {
-                    throw new \Exception("Header has been sent before $hf / $hl");
-                }
-            }
-        }
-
-        public static function saveTicket() : string {
-            $t = hash( "sha256", date("YmdHis") . uniqid() . rand(1,177) );
-            self::sessionSet(HTTP_TICKET,$t);
-            return $t;
-        }
-
-        public static function testTicket() : bool {
-            if ( isset($_SERVER[HTTP_TICKET]) ) {
-                return ( $_SERVER[HTTP_TICKET] ==  static::sessionGet(HTTP_TICKET));
-            }
-            return false;
-        }
-
-        public static function hasTicketSent() {
-            return isset($_SERVER[HTTP_TICKET]);
-        }
-
-        public static function sessionGet(string $name, $default = null)
-        {
-            static::sessionStart();
-            return (isset($_SESSION[$name]) ? $_SESSION[$name] : $default);
-        }
-        public static function sessionSet(string $name, $value): void
-        {
-            static::sessionStart();
-            $_SESSION[$name] = $value;
-        }
-
-        public static function sessionKill(): void
-        {
-            static::sessionStart();
-            session_unset();
-        }
-
-        public static function sessionClose() {
-            if (isset($_SESSION)) {
-                session_write_close();
-            }
-        }
-
         public static function exec(callable $method)
         {
-            if ( self::testTicket() ) {
-                $params = self::generateParams($method);
+
+            $params = self::generateParams($method);
                 try {
                     return [
                         "success" => true,
-                        "ajax" => self::hasTicketSent(),
                         "data"=> call_user_func_array($method, $params)
                     ];
                 } catch (Exception $ex) {
                     return [
                         "success" => false,
-                        "ajax" => self::hasTicketSent(),
                         "data"=>[
                             "message"  => $ex->getMessage(),
                             "code" => $ex->getCode(),
@@ -166,10 +113,7 @@ define("HTTP_TICKET","HTTP_TICKET");
                             "line" => $ex->getLine()
                         ]
                     ];
-                }
-            } else {
-                throw new Exception("This method must be called with ticket");
-            }            
+                }            
         }
 
         private static function generateParams(callable $method): array

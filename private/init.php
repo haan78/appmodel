@@ -2,65 +2,47 @@
 if (!defined('ROOT')) {
     exit();
 }
+require_once __DIR__ . '/vendor/autoload.php';
 require_once "lib/Web/Web.php";
-require_once "lib/Web/Vue.php";
-require_once "vendor/autoload.php";
+require_once "lib/Web/Session.php";
 require_once "user.php";
 require_once "db.php";
-require_once "page_helper.php";
+require_once "json.php";
+require_once "page.php";
 require_once "settings.php";
 
 use Web\Web;
-use Web\Vue;
 
 Web::errorHandler(function (Exception $ex) {
-    page_helper::errorHTML($ex);
+    include "error.php";
 });
 
-$path = isset(Web::pathinfo()[0]) ? Web::pathinfo()[0] : "";
+$action = Web::path(0);
 
-if ($path == "") {
-    $t = user::testForLogin($md, $path);
-    if ($t === user::TEST_ACCEPT) {
-        page_helper::temp1(Vue::scriptList(ROOT, "main", $md));
-    } elseif ($t === user::TEST_RELOAD) {
-        header("Refresh:0; url=/$path");
-    } else { //TEST_REJECT
-        page_helper::temp1(Vue::scriptList(ROOT, "login", $md));
-    }
-    db::log("Test1", "LogHTML", ["test" => $t, "session" => $_SESSION]);
-} elseif ($path == "server") {
-    page_helper::json(Web::exec(function () {
-        return $_SERVER;
-    }));
-    db::log("Test1", "LogAJAX", ["method" => "server", "session" => $_SESSION]);
-} elseif ($path == "topla") {
-    page_helper::json(Web::exec(function ($post) {
-        return ($post[0] + $post[1] + 1);
-    }));
-} elseif ($path == "logout") {
-    Web::sessionKill();
-    header("Refresh:0; url=/");
-} elseif ($path == "captcha") {
-    $p = new Gregwar\Captcha\PhraseBuilder(4, '1234567890');
-    $c = new Gregwar\Captcha\CaptchaBuilder(null, $p);
-    $c->build();
-    Web::sessionSet("captcha", $c->getPhrase());
-    //echo user::sessionGet("captcha");
-    header('Content-type: image/jpeg');
-    $c->output();
-} elseif ($path == "upload") {
+if ($action == "" || $action == "main") {
+    include "main.php";
+} elseif ($action == "welcome") {
+    include "welcome.php";
+} elseif ($action == "login") {
+    include "login.php";
+} elseif ($action == "reset") {
+    include "reset.php";
+} elseif ($action =="activate") {
+    include "activate.php";
+} elseif ($action == "register" ) {
+    include "register.php";
+} elseif ($action == "logout") {
+    include "logout.php";
+} elseif ($action == "json_pup") {
+    include "json_pup.php";    
+} elseif ($action == "json_prv") {
+    include "json_prv.php";    
+} elseif ($action == "captcha") {
+    include "captcha.php";
+} elseif ($action == "upload") {
     include "upload.php";
-} elseif ($path == "cros") {
-    include "cros.php";
-} elseif ($path == "info") {
+} elseif ($action == "info") {
     phpinfo();
-} elseif ($path == "test") {
-    echo "<pre>" . PHP_EOL;
-    print_r($_SERVER);
-    echo PHP_EOL . "</pre>";
-} elseif ($path == "mongo") {
-    include "mongo.php";
 } else {
     throw new Exception("There is no action like $path");
 }

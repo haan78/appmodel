@@ -8,7 +8,7 @@ module.exports = {
 
     pages: {
         main: "src/main.js",
-        login: "src/login.js"
+        welcome: "src/welcome.js"
     },
 
     css: {
@@ -28,7 +28,7 @@ module.exports = {
     chainWebpack: config => {
         
         config.plugins.delete('html-main').delete('prefetch-main').delete('preload-main');
-        config.plugins.delete('html-login').delete('prefetch-login').delete('preload-login');
+        config.plugins.delete('html-welcome').delete('prefetch-welcome').delete('preload-welcome');
         config.devtool( mode == 'development' ? 'source-map' : false);
     }
 }
