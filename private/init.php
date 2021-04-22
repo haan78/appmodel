@@ -14,7 +14,7 @@ require_once "settings.php";
 use Web\Web;
 
 Web::errorHandler(function (Exception $ex) {
-    include "error.php";
+    page::error($ex);
 });
 
 $action = Web::path(0);
