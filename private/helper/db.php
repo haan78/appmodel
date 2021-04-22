@@ -1,5 +1,5 @@
 <?php
-require_once "lib/MySqlTool/MySqlToolCall.php";
+require_once __DIR__ . "/../lib/MySqlTool/MySqlToolCall.php";
 
 class db {
     private static $mongodb = null;

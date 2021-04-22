@@ -36,7 +36,7 @@ define("HTTP_TICKET","HTTP_TICKET");
                 return self::$path_info;
             }
             if (isset($_SERVER["PATH_INFO"])) {
-                $pi = explode("/", $_SERVER["PATH_INFO"]);
+                $pi = explode("/",trim( $_SERVER["PATH_INFO"] ) );
                 if (count($pi) >= 1 && $pi[0] == "") {
                     array_shift($pi);
                 }
@@ -47,8 +47,8 @@ define("HTTP_TICKET","HTTP_TICKET");
             return self::$path_info;
         }
 
-        public static function path(int $index = 0) : string {
-            return isset(self::pathinfo()[$index]) ? self::pathinfo()[$index] : "";
+        public static function path(int $index = 0,string $default = "") : string {
+            return isset(self::pathinfo()[$index]) && !empty(self::pathinfo()[$index]) ? self::pathinfo()[$index] : $default;
         }
 
         public static function errorHandler(callable $fnc = null)

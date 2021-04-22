@@ -1,8 +1,8 @@
 <?php
 
-require_once "lib/Web/Webpack.php";
-require_once "lib/Web/Ticket.php";
-require_once "lib/Web/Session.php";
+require_once __DIR__ . "/../lib/Web/Webpack.php";
+require_once __DIR__ . "/../lib/Web/Ticket.php";
+require_once __DIR__ . "/../lib/Web/Session.php";
 
 use \Web\Ticket;
 use \Web\SessionDefault;
