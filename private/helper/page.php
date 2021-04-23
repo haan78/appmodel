@@ -2,16 +2,15 @@
 require_once __DIR__ . "/../lib/Web/Webpack.php";
 require_once __DIR__ . "/../lib/Web/Ticket.php";
 require_once __DIR__ . "/../lib/Web/Session.php";
+require_once __DIR__ . "/../vendor/autoload.php";
 
 use \Web\Ticket;
 use \Web\SessionDefault;
 
-class page
-{
-    public static function vuePage(string $script, array $args = []): void
-    {
-        function encodeMetaData(array $metadata, int $expire = 60): string
-        {
+class page {
+    public static string $HTTP_ROOT = HTTP_ROOT;
+    public static function vuePage(string $script, array $args = []): void {
+        function encodeMetaData(array $metadata, int $expire = 60): string {
             $key = hash("sha256", date("YmdHis") . (string)openssl_random_pseudo_bytes(40) . uniqid());
             $md = $metadata;
             $md["exp"] = time() + $expire;
@@ -20,13 +19,12 @@ class page
         }
         $md = array_merge(["__TICTKE__" => (new Ticket(new SessionDefault()))->save()], $args);
         $str = encodeMetaData($md);
-        \Web\webpack(ROOT, "css", "js", $script, $head, $body);
+        \Web\webpack(static::$HTTP_ROOT, "css", "js", $script, $head, $body);
         $head = '<meta name="backend" content="' . $str . '">' . PHP_EOL . $head;
-        static::template($head,$body);
+        static::template($head, $body);
     }
 
-    public static function template($head, $body)
-    {
+    public static function template($head, $body) {
         ob_start();
 ?>
         <!DOCTYPE html>
@@ -54,7 +52,7 @@ class page
         </body>
 
         </html>
-<?php
+    <?php
         ob_end_flush();
     }
 
