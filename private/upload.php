@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/lib/Web/MongoUpload.php';
-require_once "db.php";
+require_once __DIR__ . "/helper/db.php";
 
 
 $id = filter_input(INPUT_GET,"id",FILTER_SANITIZE_SPECIAL_CHARS);

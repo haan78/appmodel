@@ -2,11 +2,6 @@
 define("HTTP_ROOT",__DIR__); //=> /app
 
 require_once "/private/lib/Web/Web.php";
-require_once "/private/helper/user.php";
-require_once "/private/helper/db.php";
-require_once "/private/helper/json.php";
-require_once "/private/helper/page.php";
-require_once "/private/helper/settings.php";
 
 use Web\Web;
 
