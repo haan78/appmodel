@@ -11,8 +11,16 @@ export default {
         console.log(details);
     },
     
-    init() {
-        this.metaData=this.meta(jwt);
+    data(reload) {
+        if ( this.metaData === null || reload ) {
+            this.metaData=this.meta(jwt);
+        }
+        return this.metaData;
+        
+    },
+
+    cookie(name) {
+        return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
     },
 
     ajax(url,data,onSuccess,onError) {
@@ -46,13 +54,13 @@ export default {
 
     meta(jwt) {
 
-        var backend = document.querySelector("meta[name='backend']");
-        if (backend!==null) {
-            var raw = backend.getAttribute("content");
+        var md = document.querySelector("meta[name='SUBUTAI']");
+        if (md!==null) {
+            var code = md.getAttribute("content");
+            var key = this.cookie("SUBUTAI");
             try {
-                var arr = raw.split("|");
-                if (arr[1]) {
-                    return jwt.verify(arr[0],arr[1]);
+                if (key) {
+                    return jwt.verify(code,key);
                 } else {
                     return null;
                 }            

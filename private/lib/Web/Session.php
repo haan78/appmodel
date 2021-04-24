@@ -26,7 +26,13 @@ namespace Web {
         public function kill() : void {
             $this->start();
             session_unset();
-            session_destroy();
+            session_destroy(); 
+            $ckeys = array_keys($_COOKIE);
+            for ($i=0; $i< count($ckeys); $i++) {
+                $ck = $ckeys[$i];
+                setcookie($ck, "", time() - 3600);
+            }
+            session_write_close();
         }
 
         public function clear(): void

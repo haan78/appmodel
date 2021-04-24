@@ -19,7 +19,7 @@ RUN echo "session.save_path = \"tcp://redis:6379\"" >> /etc/php7/php.ini
 RUN apk del tzdata
 
 RUN rm -rf /var/cache/apk/*
-RUN mkdir /app
+RUN mkdir /public
 COPY ./php-fpm-ex.conf /etc/php7/php-fpm.conf
 COPY ./composer.init.sh /composer.init.sh
 

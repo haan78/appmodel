@@ -6,33 +6,18 @@
       </div>
       <div class="body">
         <el-card>
-        <Login v-if="mode == 'login'"></Login>
-        <Forgot v-if="mode == 'forgot'"></Forgot>
-        <Register v-if="mode == 'register'"></Register>
+        <Login v-if="com == 'login'"></Login>
+        <Forgot v-if="com == 'forgot'"></Forgot>
+        <Register v-if="com == 'register'"></Register>
+        <Activate v-if="com == 'activate'"></Activate>
+        <PassReset v-if="com == 'reset'"></PassReset>
+        
       </el-card>
       </div>
       
 
       <div class="footer">
         <div class="links">
-          <a
-            href="javascript:;"
-            v-show="mode != 'login'"
-            @click="mode = 'login'"
-            >Login</a
-          >
-          <a
-            href="javascript:;"
-            v-show="mode != 'forgot'"
-            @click="mode = 'forgot'"
-            >Forgot Password?</a
-          >
-          <a
-            href="javascript:;"
-            v-show="mode != 'register'"
-            @click="mode = 'register'"
-            >Register</a
-          >
         </div>
       </div>
     </div>
@@ -44,15 +29,19 @@ import "element-plus/lib/theme-chalk/index.css";
 import Login from "./Login";
 import Forgot from "./Forgot";
 import Register from "./Register";
+import Activate from "./Activate";
+import PassReset from "./PassReset";
 export default {
-  components: { Login, Forgot, Register },
+  components: { Login, Forgot, Register, Activate, PassReset },
   data() {
     return {
-      mode: "login",
+      com: "login"
     };
   },
   created() {
-    this.$subutai.init();
+    console.log(document.cookie);
+    console.log(this.$subutai.data());
+    this.com = this.$subutai.data().com;
   },
   methods: {
     get() {

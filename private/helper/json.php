@@ -7,7 +7,7 @@ use \Web\SessionDefault;
 
 class json {
 
-    public static bool $auth = true;
+    public static $auth = false;
     private static function print($result) {
         header("Content-Type: application/json; charset=utf-8");
         echo json_encode($result);
@@ -19,11 +19,15 @@ class json {
     public static function response(callable $fnc) {
         $t = new Ticket(new SessionDefault());
         if ($t->pass()) {
-            if (static::$auth) {
-                static::print(Web::exec($fnc));
+            if ( is_callable(static::$auth) ) {
+                if ( call_user_func(static::$auth) ) {
+                    static::print(Web::exec($fnc));
+                } else {
+                    static::error("Auth Fail!");
+                }
             } else {
-                static::error("Auth Fail!");
-            }           
+                static::print(Web::exec($fnc));
+            }          
         } else {
             static::error("Ticket problem!");
         }

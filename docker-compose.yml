@@ -10,7 +10,7 @@ services:
         volumes:
             - "./conf/nginx-default.conf:/etc/nginx/conf.d/default.conf"
             - "./volumes/log/nginx:/var/log/nginx:rw"
-            - "./dist:/app"
+            - "./dist:/public"
         ports:
             - "80:80"
     phpfpm:
@@ -20,7 +20,7 @@ services:
         environment: 
             COMPOSER: "/composer.json"
         volumes:
-            - "./dist:/app"
+            - "./dist/index.php:/public/index.php"
             - "./private:/private"
             - "./conf/session_redis.ini:/etc/php7/conf.d/session_redis.ini"
             - "./conf/composer.json:/composer.json"

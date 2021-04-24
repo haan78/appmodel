@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . "/../lib/Web/Webpack.php";
 require_once __DIR__ . "/../lib/Web/Ticket.php";
 require_once __DIR__ . "/../lib/Web/Session.php";
 require_once __DIR__ . "/../vendor/autoload.php";
@@ -8,35 +7,40 @@ use \Web\Ticket;
 use \Web\SessionDefault;
 
 class page {
-    public static string $HTTP_ROOT = HTTP_ROOT;
-    public static function vuePage(string $script, array $args = []): void {
-        function encodeMetaData(array $metadata, int $expire = 60): string {
-            $key = hash("sha256", date("YmdHis") . (string)openssl_random_pseudo_bytes(40) . uniqid());
-            $md = $metadata;
-            $md["exp"] = time() + $expire;
-            $token = \Firebase\JWT\JWT::encode($md, $key);
-            return $token . "|" . $key;
-        }
-        $md = array_merge(["__TICTKE__" => (new Ticket(new SessionDefault()))->save()], $args);
-        $str = encodeMetaData($md);
-        \Web\webpack(static::$HTTP_ROOT, "css", "js", $script, $head, $body);
-        $head = '<meta name="backend" content="' . $str . '">' . PHP_EOL . $head;
-        static::template($head, $body);
+
+    private static function encodeMetaData(array $metadata): string {
+        $key = hash("sha256", date("YmdHis") . (string)openssl_random_pseudo_bytes(40) . uniqid());
+        $md = $metadata;
+        $md["exp"] = time() + 60;
+        $token = \Firebase\JWT\JWT::encode($md, $key);
+        setcookie("SUBUTAI", $key, time() + 900);
+        return $token;
     }
 
-    public static function template($head, $body) {
+
+    public static function template(string $entry, array $args = []) {
+        $session = new SessionDefault();
+        $md = array_merge(["__TICTKE__" => (new Ticket($session))->save()], $args);
+        $jwt = static::encodeMetaData($md);
+        $rnd = uniqid();
         ob_start();
 ?>
         <!DOCTYPE html>
         <html>
 
-        <head profile="http://www.w3.org/2005/10/profile">
+        <head>
+            <meta name="SUBUTAI" content="<?php echo $jwt; ?>">
             <meta charset='utf-8'>
             <meta http-equiv='X-UA-Compatible' content='IE=edge'>
             <title>SUBUTAI</title>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
             <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-            <?php echo $head; ?>
+            <link href="css/chunk-vendors.css?<?php echo $rnd; ?>" rel="preload" as="style" />
+            <link href="css/chunk-vendors.css?<?php echo $rnd; ?>" rel="stylesheet" />
+            <link href="css/<?php echo $entry; ?>.css?<?php echo $rnd; ?>" rel="preload" as="style" />
+            <link href="css/<?php echo $entry; ?>.css?<?php echo $rnd; ?>" rel="stylesheet" />
+            <link href="js/chunk-vendors.js?<?php echo $rnd; ?>" rel="preload" as="script" />
+            <link href="js/<?php echo $entry; ?>.js?<?php echo $rnd; ?>" rel="preload" as="script" />
         </head>
 
         <body onload=" __READY__() ">
@@ -48,7 +52,8 @@ class page {
                             document.getElementById("app").style.display = "block";
                         }
                     </script>
-                    <?php echo $body; ?>
+                    <script src="js/chunk-vendors.js?<?php echo $rnd; ?>"></script>
+                    <script src="js/<?php echo $entry; ?>.js?<?php echo $rnd; ?>"></script>
         </body>
 
         </html>
