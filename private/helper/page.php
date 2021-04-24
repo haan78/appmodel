@@ -13,7 +13,7 @@ class page {
         $md = $metadata;
         $md["exp"] = time() + 60;
         $token = \Firebase\JWT\JWT::encode($md, $key);
-        setcookie("SUBUTAI", $key, time() + 900);
+        setcookie("SUBUTAI", $key, time() + 60);
         return $token;
     }
 

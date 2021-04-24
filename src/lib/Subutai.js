@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 export default {
     ajaxActivationCount:0,
     metaData:null,
+    __secretKey:"",
     isLoading() {
         return this.ajaxActivationCount > 0;
     },
@@ -57,10 +58,12 @@ export default {
         var md = document.querySelector("meta[name='SUBUTAI']");
         if (md!==null) {
             var code = md.getAttribute("content");
-            var key = this.cookie("SUBUTAI");
+            if ( this.__secretKey === "" ) {
+                this.__secretKey = this.cookie("SUBUTAI");
+            }
             try {
-                if (key) {
-                    return jwt.verify(code,key);
+                if (this.__secretKey) {
+                    return jwt.verify(code,this.__secretKey);
                 } else {
                     return null;
                 }            
