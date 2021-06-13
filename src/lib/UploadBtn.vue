@@ -106,28 +106,28 @@ export default {
       }
 
       if (input.files.length > 0) {
-        var fileNames = [];
+        var files = [];
+
         const formData = new FormData();
-        if (input.files.length > 1) {
-          for (var i = 0; i < input.files.length; i++) {
-            fileNames.push(input.files[i].name);
-            formData.append(self.fieldPrefix + (i + 1), input.files[i]);
-          }
-        } else {
-          //if its is only one
-          fileNames.push(input.files[0].name);
-          formData.append(self.fieldPrefix, input.files[0]);
+        for (var i = 0; i < input.files.length; i++) {
+          var n = self.fieldPrefix + (input.files.length > 1 ? (i + 1) : '' ) ;
+          files.push({
+            input:n,
+            name:input.files[i].name,
+            preview:URL.createObjectURL(input.files[i])
+          });
+          formData.append(n, input.files[i]);
         }
 
-        self.$emit("request", self.factory(formData, fileNames));
+        self.$emit("request", self.factory(formData, files));
       }
     },
-    factory(formData, fileNames) {
+    factory(formData, files) {
       let self = this;
       return {
         limit: this.limit,
         formData: formData,
-        fileNames: fileNames,
+        files: files,
         send(url, data, callback) {
           if (typeof data === "object" && data !== null) {
             for (var k in data) {

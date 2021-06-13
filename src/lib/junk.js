@@ -19,5 +19,25 @@ export default {
                 }
             }
         }
+    },
+    binarySubset(arr) {
+        var result = [];
+        var length = arr.length;
+        var subsetcount = ~~((length * (length - 1)) / 2);
+        var inc = 1;
+        var index = 0;
+        for (var i = 0; i < subsetcount; i++) {
+          var next = (index + inc) % length;
+          if (i % 2 == 0) {
+            result.push([arr[index], arr[next]]);
+          } else {
+            result.push([arr[next], arr[index]]);
+          }
+          if ((i + 1) % length == 0) {
+            inc++;
+          }
+          index = (index + 1) % length;
+        }
+        return result;
     }
 }

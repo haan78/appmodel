@@ -8,7 +8,10 @@
 <script>
 import 'element-plus/lib/theme-chalk/index.css'
 export default {
-  name: 'Main'
+  name: 'Main',
+  created() {
+    console.log(document.cookie);
+  }
 }
 </script>
 

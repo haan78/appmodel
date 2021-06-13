@@ -20,8 +20,8 @@ services:
         environment: 
             COMPOSER: "/composer.json"
         volumes:
-            - "./dist/index.php:/public/index.php"
-            - "./private:/private"
+            - "./dist/index.php:/public/index.php:consistent"
+            - "./private:/private:consistent"
             - "./conf/session_redis.ini:/etc/php7/conf.d/session_redis.ini"
             - "./conf/composer.json:/composer.json"
         ports:

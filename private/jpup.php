@@ -1,11 +1,13 @@
 <?php
-require_once __DIR__ . "/helper/json.php";
-$action = Web\Web::path(1);
+require_once __DIR__ . "/lib/Web/Json.php";
 
-if ($action=="server") {
-    json::response(function () {
+use \Web\Json;
+Json::$JSON_FLAGS = JSON_PRETTY_PRINT;
+Json::perform(function() {
+    $action = Web\Web::path(1);
+    if ( $action == "server" ) {
         return $_SERVER;
-    });
-} else {
-    json::error("Action unknown");
-}
+    } else {
+        throw new Exception("Action unknown");
+    }
+});

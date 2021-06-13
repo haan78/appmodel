@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../lib/MySqlTool/MySqlToolCall.php";
+require_once __DIR__ .  "/../vendor/autoload.php";
 
 class db {
     private static $mongodb = null;

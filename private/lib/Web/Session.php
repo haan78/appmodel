@@ -24,14 +24,8 @@ namespace Web {
         }
 
         public function kill() : void {
-            $this->start();
-            session_unset();
-            session_destroy(); 
-            $ckeys = array_keys($_COOKIE);
-            for ($i=0; $i< count($ckeys); $i++) {
-                $ck = $ckeys[$i];
-                setcookie($ck, "", time() - 3600);
-            }
+            $this->clear();
+            session_destroy();            
             session_write_close();
         }
 
@@ -39,6 +33,11 @@ namespace Web {
         {
             $this->start();
             session_unset();
+            $ckeys = array_keys($_COOKIE);
+            for ($i=0; $i< count($ckeys); $i++) {
+                $ck = $ckeys[$i];
+                setcookie($ck, "", time() - 3600);
+            }
         }
         
         public function start() : void {

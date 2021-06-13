@@ -39,9 +39,9 @@ export default {
     };
   },
   created() {
-    console.log(document.cookie);
-    console.log(this.$subutai.data());
-    this.com = this.$subutai.data().com;
+    //console.log(document.cookie);
+    //console.log(this.$subutai.data());
+    this.com = (window.__DATA__ && window.__DATA__.com ? window.__DATA__.com : "login");
   },
   methods: {
     get() {
@@ -69,7 +69,7 @@ body {
     margin: 0;
 }
 #app {
-  height: 70%;
+  height: 100%;
 }
 .container {
   height: 100%;
@@ -78,7 +78,7 @@ body {
   justify-content: center;
 
   .main {
-    max-width: 70%;
+    max-width: 60%;
     min-width: 30%;
     .header {
       text-align: center;
