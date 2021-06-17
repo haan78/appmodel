@@ -51,7 +51,7 @@ define("HTTP_TICKET","HTTP_TICKET");
             return isset(self::pathinfo()[$index]) && !empty(self::pathinfo()[$index]) ? self::pathinfo()[$index] : $default;
         }
 
-        public static function errorHandler(callable $fnc = null)
+        public static function errorHandler(callable $fnc, bool $stopOnError = true )
         {
             error_reporting(E_ALL);
             //ini_set('display_errors', TRUE);
@@ -59,83 +59,20 @@ define("HTTP_TICKET","HTTP_TICKET");
             ini_set('display_startup_errors', TRUE);
             register_shutdown_function(function() use($fnc) {
                 $er = error_get_last();
-                if (!is_null($er)) {
+                if (!is_null($er) && $er["type"] == E_ERROR) {
                     $ex = new WebErrorException($er["message"], $er["type"], 0, $er["file"], $er["line"]);
-                    call_user_func_array( $fnc,[$ex] );                   
+                    http_response_code(200);
+                    call_user_func_array( $fnc,[$ex] );
+
                 }
             });
-            set_error_handler(function ($errno, $errstr, $errfile, $errline) use($fnc) {
+            set_error_handler(function ($errno, $errstr, $errfile, $errline) use($fnc,$stopOnError) {
                 $ex = new WebErrorException($errstr, $errno, 0, $errfile, $errline);
                 call_user_func_array($fnc,[$ex]);
+                if ( $stopOnError ) {
+                    exit();
+                }
             }, E_ALL);
-        }
-
-        public static function jsonPost(bool $reload = false)
-        {
-            if ( self::$json_data !== false && $reload === false ) {
-                return self::$json_data;
-            }
-            if (!empty($_POST)) {
-                self::$json_data = (object)$_POST;
-            } else {
-                $PD = file_get_contents("php://input");
-                if (!empty($PD)) { //Json has been sent
-                    $jd = json_decode($PD);
-                    $jle = json_last_error();
-                    if ($jle == JSON_ERROR_NONE) {
-                        self::$json_data = $jd;
-                    } else {
-                        throw new \Exception("Post data cannot be parsed into Json / $jle");
-                    }
-                } else {
-                    self::$json_data = null;
-                }
-                return self::$json_data;
-            }
-        }
-
-        public static function exec(callable $method)
-        {
-
-            $params = self::generateParams($method);
-                try {
-                    return [
-                        "success" => true,
-                        "data"=> call_user_func_array($method, $params)
-                    ];
-                } catch (Exception $ex) {
-                    return [
-                        "success" => false,
-                        "data"=>[
-                            "message"  => $ex->getMessage(),
-                            "code" => $ex->getCode(),
-                            "file" => $ex->getFile(),
-                            "line" => $ex->getLine()
-                        ]
-                    ];
-                }            
-        }
-
-        private static function generateParams(callable $method): array
-        {
-            $ref = new \ReflectionFunction($method);
-            $parameters = $ref->getParameters();
-            $arr = [];
-            for ($i = 0; $i < count($parameters); $i++) {
-                $p = $parameters[$i];
-                $name = $p->getName();
-                if ($name == "post") {
-                    array_push($arr, self::jsonPost());
-                } elseif ($name == "pathinfo") {
-                    array_push($arr, self::pathInfo());
-                } elseif ($name=="req") {
-                    $req = array_merge($_GET,self::jsonPost());
-                    array_push($arr, $req);
-                } else {
-                    array_push($arr, null);
-                }
-            }
-            return $arr;
         }
     }
 }
