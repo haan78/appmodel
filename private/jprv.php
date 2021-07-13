@@ -4,6 +4,7 @@ require_once __DIR__ . "/lib/Web/Json.php";
 
 use \Web\Json;
 Json::perform(function() {
+    user::jsonValidate(true);
     $action = Web\Web::path(1);
     if ( $action == "topla" ) {
         return $_SERVER;

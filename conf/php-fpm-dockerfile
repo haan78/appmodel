@@ -21,8 +21,12 @@ RUN apk del tzdata
 RUN rm -rf /var/cache/apk/*
 RUN mkdir /public
 COPY ./php-fpm-ex.conf /etc/php7/php-fpm.conf
-COPY ./composer.init.sh /composer.init.sh
+
+COPY ./session_redis.ini /etc/php7/conf.d/session_redis.ini
+
+ENV COMPOSER /etc/composer.json
+COPY ./composer.json /etc/composer.json
+RUN composer install
 
 EXPOSE 9000
-##CMD "sh /composer.init.sh"
 ENTRYPOINT ["php-fpm7", "-F"]

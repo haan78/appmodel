@@ -4,6 +4,7 @@ require_once __DIR__ . "/../lib/Web/Session.php";
 require_once __DIR__ . "/db.php";
 
 use \Web\SessionDefault;
+use Web\Ticket;
 
 class User {
     public static function validate() : bool {
@@ -14,6 +15,19 @@ class User {
         } else {
             //var_dump($_SESSION); exit();
             return false;
+        }
+    }
+
+    public static function jsonValidate(bool $ticket = false) : void {
+        $s = new SessionDefault();
+        if ( $s->get("email") ) {
+            if ($ticket) {
+                if (!Ticket::pass($s)) {
+                    throw new Exception("Ticket Failed!");
+                }
+            }
+        } else {
+            throw new Exception("Auth Failed!");
         }
     }
 

@@ -13,12 +13,3 @@ window["__INIT__"] = (data) => {
     window["__DATA__"] = (data ? data : null);
     createApp(welcome).use(ElementPlus, { locale }).use(subutai).mount(container);
 }
-
-/*window.addEventListener("load",()=>{
-    document.body.innerHTML = "";
-    document.body.style.margin = "0";
-    document.body.style.padding = "0";
-    var container = document.createElement("div");
-    document.body.appendChild( container );
-    createApp(welcome).use(ElementPlus, { locale }).use(subutai).mount(container);
-});*/

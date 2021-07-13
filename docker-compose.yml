@@ -12,18 +12,17 @@ services:
             - "./volumes/log/nginx:/var/log/nginx:rw"
             - "./dist:/public"
         ports:
-            - "80:80"
+            - target: 80
+              published: 8001
+              mode: host
     phpfpm:
         build:
             context: ./conf
             dockerfile: php-fpm-dockerfile
-        environment: 
-            COMPOSER: "/composer.json"
         volumes:
             - "./public/index.php:/public/index.php:consistent"
             - "./private:/private:consistent"
-            - "./conf/session_redis.ini:/etc/php7/conf.d/session_redis.ini"
-            - "./conf/composer.json:/composer.json"
+            - "./vendor:/vendor:consistent"
         ports:
             - "9000:9000"
     redis:
@@ -31,7 +30,7 @@ services:
         environment:
             TZ: "Asia/Istanbul"
         volumes:
-            - "./volumes/redis:/data:rw"
+            - "redisvol:/data:rw"
         expose: 
             - "6379"
         ports:
@@ -43,7 +42,7 @@ services:
             MYSQL_ROOT_PASSWORD: "40801772"
         volumes:
             - "./src/sql/init/maria_master:/docker-entrypoint-initdb.d"
-            - "./volumes/maria:/var/lib/mysql:rw"
+            - ".mariadbvol:/var/lib/mysql:rw"
         expose: 
             - "3306"
         ports:
@@ -59,4 +58,9 @@ services:
         expose: 
             - "27017"
         volumes:
-            - ./volumes/mongo:/data/db
+            - .mongodbvol:/data/db
+
+volumes:
+    mongodbvol:
+    mariadbvol:
+    redisvol:

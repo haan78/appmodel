@@ -2,8 +2,6 @@
 
 namespace Web {
 
-use Exception;
-
 define("HTTP_TICKET","HTTP_TICKET");
 
     class WebErrorException extends \ErrorException
@@ -28,7 +26,6 @@ define("HTTP_TICKET","HTTP_TICKET");
     class Web
     {
 
-        private static $json_data = false;
         private static $path_info = false;
         public static function pathInfo(bool $reload = false): array
         {
@@ -45,6 +42,18 @@ define("HTTP_TICKET","HTTP_TICKET");
                 self::$path_info = [];
             }
             return self::$path_info;
+        }
+
+        public static function client() : string {
+            if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+                return trim(explode(",",$_SERVER["HTTP_X_REAL_IP"])[0]);
+            } elseif ( isset($_SERVER["HTTP_X_REAL_IP"]) ) {
+                return trim($_SERVER["HTTP_X_REAL_IP"]);
+            } elseif ( isset($_SERVER["REMOTE_ADDR"]) ) {
+                return trim($_SERVER["REMOTE_ADDR"]);
+            } else {
+                return "";
+            }
         }
 
         public static function path(int $index = 0,string $default = "") : string {

@@ -6,7 +6,10 @@ use Exception;
 
 class Json {
         public static int $JSON_FLAGS = 0;
-        public static int $ERROR_LEVEL = 1;
+
+        public static $responseformat;
+        public static $errorFormat;
+
         public static function jsonPost()
         {
             if (!empty($_POST)) {
@@ -28,37 +31,51 @@ class Json {
         }
 
         public static function output($result) {
-            header("Content-Type: application/json; charset=utf-8");
-            echo json_encode($result,static::$JSON_FLAGS);
+
+            $success = true;
+            $data = null;
+            if ( $result instanceof Exception ) {
+                $success = false;
+                if ( is_callable(static::$errorFormat)  ) {
+                    $data = \call_user_func_array( static::$errorFormat,[ $result ] );
+                } else {
+                    $data = static::errorData($result);
+                }
+            }
+
+            if ( is_callable(static::$responseformat) ) {
+                $data = \call_user_func_array(static::$responseformat,[$success,$result]);
+            } else {
+                $data = [
+                    "success" => $success,
+                    "data" => $result
+                ];
+            }
+
+            if ( !headers_sent() ) {
+                header("Content-Type: application/json; charset=utf-8");
+            }
+            echo json_encode($data,static::$JSON_FLAGS);
         }
 
-        public static function error(Exception $ex) : void {
-            $arr = [
-                "message" => $ex->getMessage()
-            ];
-            if ( static::$ERROR_LEVEL == 1 ) {
-                $arr["code"] = $ex->getCode();
-                $arr["line"] = $ex->getLine();
-                $arr["file"] = $ex->getFile();
-            }
-            
-            static::output([
-                "success" => false,
-                "data" => $arr
-            ]);
+        public static function errorData(Exception $ex) : array {
+            return [
+                "message" => $ex->getMessage(),
+                "code" => $ex->getCode(),
+                "line" => $ex->getLine(),
+                "file" => $ex->getFile(),
+                "class" => get_class($ex)
+            ];           
         }
 
         public static function perform(callable $fnc) : void {
             Web::errorHandler(function (Exception $ex) {
-                Json::error($ex);
+                Json::output( $ex );
             });
             try {
-                static::output([
-                    "success" => true,
-                    "data" => \call_user_func_array($fnc,[static::jsonPost()])
-                ]);
+                static::output(\call_user_func_array($fnc,[static::jsonPost()]));
             } catch (Exception $ex) {
-                static::error($ex);
+                static::output( $ex );
             }            
         }
     }

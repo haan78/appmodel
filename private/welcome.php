@@ -29,7 +29,7 @@ ob_start();
     <script src="assets/chunk-vendors.js?<?php echo $rnd; ?>"></script>
     <script src="assets/welcome.js?<?php echo $rnd; ?>"></script>
     <script>
-        __INIT__('<?php echo json_encode($data); ?>');
+        __INIT__(<?php echo json_encode($data); ?>);
     </script>
 </body>
 

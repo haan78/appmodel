@@ -2,7 +2,7 @@
     "description": "Apptemp Copmoser items",
     "name":"baris/appmodel2",
     "config": {
-        "vendor-dir": "/private/vendor"
+        "vendor-dir": "/vendor"
     },
 
     "require": {
