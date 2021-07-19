@@ -1,5 +1,5 @@
 export default (options) => {
-    var defauts = {
+    var defaults = {
         "margin":"0",
         "padding":"0",
         "tag":"div"
