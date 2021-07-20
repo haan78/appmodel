@@ -1,8 +1,14 @@
 .DS_Store
 node_modules
-/dist
-private/vendor
+dist
+vendor
 volumes
+old
+
+.mongodbvol
+.mariadbvol
+.redisvol
+
 
 
 # local env files

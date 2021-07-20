@@ -1,23 +1,12 @@
 const path = require("path");
+const glob = require('glob');
 const mode = process.env.NODE_ENV;
 
 console.log("Mode: "+mode);
-const pages = {
-    main: "src/main.js",
-    welcome: "src/welcome.js",
-    test:{
-        entry:"src/test.js",
-        chunks: ['chunk-vendors', 'chunk-common', 'test'],
-        template:"public/temp.php",
-        filename:"test.php"
-        /*template:"public/temp.php",
-        title:"Test",
-        filename:"test.php",
-        inject:"head",
-        favicon:"public/assets/favicon-96x96.png",
-        chunks: ['chunk-vendors', 'chunk-common', 'test']*/
-    }
-};
+const pages = glob.sync('src/**.js').reduce(function(obj, el){
+    obj[path.parse(el).name] = el;
+    return obj
+ },{});
 
 module.exports = {
     outputDir: path.resolve(__dirname, "dist"),

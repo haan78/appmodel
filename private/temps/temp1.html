@@ -11,12 +11,36 @@
 </head>
 
 <body>
-    <div>Please Wait...</div>
-    
+    <div class="container">
+        <section id="app">
+            Please Wait...
+        </section>        
+    </div>
+
     <!--JS-->
-    <script>
-        INIT("selam");
-    </script>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            background: cornflowerblue;
+            margin: 0;
+        }
+
+        .container {
+            height: 100%;
+            display: flex;
+            align-items: top;
+            justify-content: center;
+        }
+
+        .container #app {
+            margin-top: 10%;
+            height: 400px;
+            width: 400px;
+            background-color: cadetblue;
+        }
+    </style>
 </body>
 
 </html>

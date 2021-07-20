@@ -2,12 +2,7 @@ import axios from "axios";
 
 export default {
     ajaxActivationCount: 0,
-    __TICKET__ : "",
-
-    __init__() {
-        this.__TICKET__ = this.cookie("TICKET");
-        //console.log(this.__TICKET__);
-    },
+   
     isLoading() {
         return this.ajaxActivationCount > 0;
     },
@@ -33,7 +28,7 @@ export default {
     ajax(url, data, onSuccess, onError) {
 
         let self = this;
-        let config = { headers: { "TICKET": self.__TICKET__ } };
+        let config = {};
         var err = (typeof onError === "function" ? onError : self.defaultError);
         self.ajaxActivationCount += 1;
         axios.post(url, (data ? data : null), config).then((response) => {

@@ -1,7 +1,4 @@
 <?php
-
-require_once __DIR__ . "/lib/Web/Ticket.php";
-require_once __DIR__ . "/lib/Web/Session.php";
 require_once __DIR__ . "/helper/user.php";
 
 

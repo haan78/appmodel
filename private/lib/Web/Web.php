@@ -56,6 +56,10 @@ define("HTTP_TICKET","HTTP_TICKET");
             }
         }
 
+        public static function getId() {
+            return md5(static::client().$_SERVER["HTTP_USER_AGENT"]);
+        }
+
         public static function path(int $index = 0,string $default = "") : string {
             return isset(self::pathinfo()[$index]) && !empty(self::pathinfo()[$index]) ? self::pathinfo()[$index] : $default;
         }

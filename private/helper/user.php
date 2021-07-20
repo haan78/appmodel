@@ -1,60 +1,79 @@
 <?php
 
 require_once __DIR__ . "/../lib/Web/Session.php";
+require_once __DIR__ . "/../lib/Web/SecureClient.php";
 require_once __DIR__ . "/db.php";
 
 use \Web\SessionDefault;
-use Web\Ticket;
 
 class User {
     public static function validate() : bool {
-
-        $user = (new SessionDefault())->get("email");
-        if ($user) {
-            return true;
-        } else {
-            //var_dump($_SESSION); exit();
-            return false;
-        }
+        return \Web\SecureClient::check(new SessionDefault());
     }
 
-    public static function jsonValidate(bool $ticket = false) : void {
+    public static function jsonValidate() : void {
         $s = new SessionDefault();
-        if ( $s->get("email") ) {
-            if ($ticket) {
-                if (!Ticket::pass($s)) {
-                    throw new Exception("Ticket Failed!");
-                }
-            }
-        } else {
+        if ( !static::validate() ) {
             throw new Exception("Auth Failed!");
         }
     }
 
-    public static function login(string &$message): bool {
-        if (isset($_POST["email"])) {
+    public static function htmlValidate(string $url) : void {
+        if (!static::validate()) {
+            header("Location: $url");
+            exit();
+        }
+    }
+
+    public static function jwt(string $tokenkey) : int {
+        $token = filter_input(INPUT_POST,$tokenkey,FILTER_SANITIZE_SPECIAL_CHARS);
+        if ( is_string($token) ) {
+            return 2; //fail not yet
+        } else {
+            return 1; // no tokken
+        }
+    }
+
+    public static function post(string $userkey, string $passkey, string $captchakey = "captcha") : int {
+        $user = filter_input(INPUT_POST,$userkey,FILTER_SANITIZE_SPECIAL_CHARS);
+        $pass = md5( filter_input(INPUT_POST,$passkey,FILTER_DEFAULT) );
+        $captcha = filter_input(INPUT_POST,$userkey,FILTER_SANITIZE_SPECIAL_CHARS);
+        if ( is_string($user) && is_string($pass) ) {
             $s = new SessionDefault();
-            $email = filter_input(INPUT_POST,"email",FILTER_VALIDATE_EMAIL);
-            $pass = md5( filter_input(INPUT_POST,"pass",FILTER_DEFAULT) );
-            $captcha =  isset($_POST["captcha"]) ? trim( $_POST["captcha"]) : "";
-            if ( $captcha == $s->get("captcha") ) {
-                $result = db::mongo()->selectDatabase("Test1")->selectCollection("User")->findOne(["email"=>$email, "pass"=>$pass]);
-                if ( !is_null ($result)) {
-                    $s->set("email",$email);
-                    setcookie("UserName",$result["user"],time()+3600);
-                    $message = "Go to main!";
-                    return true;
+            if ( !is_string($captcha) || $captcha == $s->get($captchakey,"?") ) {
+                $result = static::userData($user,$pass);
+                if (!is_null($result)) {
+                    static::setCookie($result);
+                    $s->set("METHOD","POST");
+                    $s->set($userkey,$user);
+                    return 0; // Ok
                 } else {
-                    //$message = $pass." / ".$email;
-                    $message = "User name or password is wrong";
+                    return 3; // Auth Fail
                 }
             } else {
-                $message = "Captcha is wrong!";
-            }            
-        } else {
-            $message = "Post request is required";
+                return 2; // Captcha fail
+            }
+        } else { 
+            return 1; //No Post
         }
-        return false;
+    }
+
+    public static function activate(): void {
+        
+    }
+
+    private static function userData($user,$pass = false) {
+        $arr=[
+            "user"=>$user
+        ];
+        if (is_string($pass)) {
+            $arr["pass"] = $pass;
+        }
+        return db::mongo()->selectDatabase("Test1")->selectCollection("User")->findOne($arr);
+    }
+
+    private static function setCookie($data) : void {
+        setcookie("UserName", $data["user"], time()+3600);
     }
 
     public static function clear() {
