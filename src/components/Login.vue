@@ -16,10 +16,9 @@
       </el-input>
     </el-form-item>
     <el-button type="primary" style="width:100%; margin-top: 1em;" @click="formEnter()" >Enter</el-button>
-    <br/>
     <div class="lnk">
-      <el-link href="/register" type="primary" >Register</el-link>&nbsp;/&nbsp;
-      <el-link href="/forgot" type="primary" >Forgot Password?</el-link>
+      <a href="/register" type="primary" >Register</a>&nbsp;/&nbsp;
+      <a href="/forgot" type="primary" >Forgot Password?</a>
     </div>
   </el-form>
 </template>
@@ -30,6 +29,7 @@
     padding-top: 5px;
   }
   .lnk {
+    margin-top: 2em;
     text-align: center;
   }
 </style>
@@ -59,7 +59,7 @@ export default {
     };
   },
   created() {
-    this.message = (window["__DATA__"] ? window["__DATA__"].message : "");
+    this.message = this.$subutai.cookie("message","");
   },
   methods:{
     formEnter() {

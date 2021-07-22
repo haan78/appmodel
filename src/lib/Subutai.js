@@ -11,7 +11,7 @@ export default {
         console.log(details);
     },
 
-    cookie(name) {
+    cookie(name,def) {
         //return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
         const value = "; " + document.cookie;
         const parts = value.split("; " + name + "=");
@@ -20,9 +20,9 @@ export default {
             const decode_vlu = decodeURIComponent(vlu);
             const replace_vlu = decode_vlu.replace(/[+]/g, ' ');
             return replace_vlu;
+        } else {
+            return ( typeof def !== "undefined" ? def : false );
         }
-        else
-            return '';
     },
 
     ajax(url, data, onSuccess, onError) {

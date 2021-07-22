@@ -12,10 +12,7 @@ class User {
     }
 
     public static function jsonValidate() : void {
-        $s = new SessionDefault();
-        if ( !static::validate() ) {
-            throw new Exception("Auth Failed!");
-        }
+        \Web\SecureClient::validate(new SessionDefault(),"Auth Failed!");
     }
 
     public static function htmlValidate(string $url) : void {
@@ -58,8 +55,13 @@ class User {
         }
     }
 
-    public static function activate(): void {
-        
+    public static function log(string $aciton): void {
+        $s = new SessionDefault();
+        $data = [
+            "session" => $s->stack(),
+            "action" => $aciton
+        ];
+        db::mongo()->selectDatabase("Test1")->selectCollection("Log")->insertOne($data);
     }
 
     private static function userData($user,$pass = false) {

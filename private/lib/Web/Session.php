@@ -5,6 +5,7 @@ namespace Web {
     {
         public function set(string $name, $value) : void;
         public function get(string $name,$default = false);
+        public function stack() : array;
         public function clear() : void;
         public function kill() : void;
         public function start() : void;
@@ -21,6 +22,15 @@ namespace Web {
         public function get(string $name, $default = false) {
             $this->start();
             return isset($_SESSION[$name]) ? $_SESSION[$name] : $default;
+        }
+
+        public function stack() : array {
+            $data = [];
+            $this->start();
+            foreach($_SESSION as $key => $val) {
+                $data[$key] = $val;
+            }
+            return $data;
         }
 
         public function kill() : void {

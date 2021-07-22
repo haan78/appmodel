@@ -1,6 +1,10 @@
-import { createApp } from 'vue';
-import main from './components/Main.vue';
-import ElementPlus from 'element-plus';
-import locale from 'element-plus/lib/locale/lang/tr';
+import { createApp } from 'vue'
+import ElementPlus from 'element-plus'
+import locale from 'element-plus/lib/locale/lang/tr'
+import subutai from './lib/SubutaiVue';
 
-createApp(main).use(ElementPlus, { locale }).mount('#app')
+import comp from './components/Main.vue';
+
+let app = document.getElementById("app");
+app.innerHTML = "";
+createApp(comp).use(ElementPlus, { locale }).use(subutai).mount(app);
