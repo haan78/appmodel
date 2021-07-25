@@ -3,44 +3,62 @@ namespace Web {
     class Template {
         public static int $time = 120;
         public static bool $useRnd = true;
+
+        private array $scripts;
+        private string $file;
+
+        public function __construct(array $scripts,string $file) {
+            $this->scripts = $scripts;
+            $this->file = $file;
+        }
+
+        public function prepare(string $content) : string {
+            $scripts = $this->scripts;
+            $rnd = "";
+            if (static::$useRnd) {
+                $rnd = "?".uniqid();    
+            }
+            $html_js = "";
+            $html_css = "";
+            for($i=0; $i<count($scripts); $i++) {
+                $s = $scripts[$i];
+                $arr = explode(".",$s);
+                $ext = ( count($arr)>1 ? strtolower( end($arr) ) : "" );
+                if ( $ext == "js" ) {
+                    $html_js .= "<script src=\"$s$rnd\"></script>";
+                } elseif ( $ext == "css" ) {
+                    $html_css .= "<link rel=\"stylesheet\" href=\"$s$rnd\" />";
+                }
+            }
+            return str_replace(["<!--CSS-->","<!--JS-->"],[$html_css, $html_js],$content);
+        }
     
-        private static function data(array $data) {
+        private function data(array $data) {
             foreach( $data as $k => $v ) {
                 setcookie($k, $v, time()+static::$time);
             }
         }
-    
-        public static function __prepare(array $cssList, array $jsList, string $content) {        
-            $rnd = "";
-            if (static::$useRnd) {
-                $rnd = uniqid();    
-            }
-            $js = "";
-            for($i=0; $i<count($jsList); $i++) {
-                $f = $jsList[$i];
-                $js.="<script src=\"$f?$rnd\"></script>";
-            }
-            $css = "";
-            for ($i=0; $i<count($cssList); $i++) {
-                $f = $cssList[$i];
-                $css.="<link rel=\"stylesheet\" href=\"$f?$rnd\" />";
-            }
-            return str_replace(["<!--CSS-->","<!--JS-->"],[$css,$js],$content);
+
+        public static function html(array $scripts, string $file, array $data = []) : void {
+            $t = new Template($scripts,$file);
+            $t->loadHtml($data);
         }
     
-        public static function load(array $cssList, array $jsList, string $file, array $data = []) {
-            static::data($data);
-            if ( file_exists($file) ) {
-                echo static::__prepare($cssList,$jsList,file_get_contents($file));
+        public function loadHtml(array $data = []) {
+            $this->data($data);
+            if ( file_exists($this->file) ) {
+                header("Content-Type: text/html; charset=utf-8");
+                echo $this->prepare(file_get_contents($this->file));
             } else {
-                throw new \Exception("File not found / $file");
+                throw new \Exception("File not found / ".$this->file);
             }
         }
     
-        public static function below(array $cssList, array $jsList, array $data = []) {
-            static::data($data);
-            ob_start(function ($html) use($cssList, $jsList) {
-                return Template::__prepare($cssList,$jsList,$html);
+        public function below(array $data = []) {
+            $this->data($data);
+            $self = $this;
+            ob_start(function ($html) use($self) {
+                return $self->prepare($html);
             });
         }
     }

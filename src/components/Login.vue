@@ -16,10 +16,6 @@
       </el-input>
     </el-form-item>
     <el-button type="primary" style="width:100%; margin-top: 1em;" @click="formEnter()" >Enter</el-button>
-    <div class="lnk">
-      <a href="/register" type="primary" >Register</a>&nbsp;/&nbsp;
-      <a href="/forgot" type="primary" >Forgot Password?</a>
-    </div>
   </el-form>
 </template>
 <style lang="scss" scoped>
@@ -28,12 +24,9 @@
     height: 27px;
     padding-top: 5px;
   }
-  .lnk {
-    margin-top: 2em;
-    text-align: center;
-  }
 </style>
 <script>
+import Cookie from "js-cookie";
 export default {
   data() {
     return {
@@ -59,7 +52,10 @@ export default {
     };
   },
   created() {
-    this.message = this.$subutai.cookie("message","");
+    console.log(Cookie.get());
+    this.message = this.$subutai.receiveFromCookie("status");
+    console.log(this.message);
+    console.log(Cookie.get());
   },
   methods:{
     formEnter() {

@@ -1,6 +1,6 @@
-import { createApp } from 'vue'
-import ElementPlus from 'element-plus'
-import locale from 'element-plus/lib/locale/lang/tr'
+import { createApp } from 'vue';
+import ElementPlus from 'element-plus';
+import locale from 'element-plus/lib/locale/lang/tr';
 import subutai from './lib/SubutaiVue';
 
 import comp from './components/Main.vue';

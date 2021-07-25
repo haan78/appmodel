@@ -15,27 +15,32 @@ module.exports = {
 
     css: {
         extract: { 
-            filename: 'assets/[name].css',
-            chunkFilename: 'assets/[name].css'
+            filename: 'css/[name].css',
+            chunkFilename: 'css/[name].css'
         }
         /*extract:false*/
     },
 
     configureWebpack: {
         output: {
-            filename: 'assets/[name].js',
-            chunkFilename: 'assets/[name].js'
-        }/*,
+            filename: 'js/[name].js',
+            chunkFilename: 'js/[name].js'
+        },
         optimization: {
-            splitChunks: false
-        }*/
+            //splitChunks: false
+            //runtimeChunk:"single",
+            //runtimeChunk:true
+        }
     },
 
     chainWebpack: config => {
 
+        //Clear HTML mess
         Object.keys(pages).forEach(key => {
             config.plugins.delete('html-'+key).delete('prefetch-'+key).delete('preload-'+key);
         });
+
+        //Save fonts into assets
         config.module.rule('fonts').use('url-loader').loader('url-loader').tap(options => {
           // modify the options...
           options.fallback.options.name = 'assets/[name].[ext]'

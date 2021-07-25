@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="">
 
 <head>
     <meta charset='utf-8'>
@@ -9,46 +9,70 @@
     <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon-96x96.png" />
     <!--CSS-->
 </head>
+<style>
+    html,
+    body {
+        height: 100%;
+        background: cornflowerblue;
+        margin: 0;
+    }
 
+    .container {
+        height: 100%;
+        display: flex;
+        align-items: top;
+        justify-content: center;
+    }
+
+    .container .section {
+        text-align: center;
+        margin-top: 5%;
+        max-width: 50%;
+        min-width: 30%;
+    }
+
+    .container .section #app {
+        text-align: left;            
+        height: auto;
+        width: 100%;
+        background-color: white;
+        padding: 1em 1em 1em 1em;
+    }
+    .container .section .nav {
+        margin-top: 1em;
+    }
+
+    .container .section .nav a {
+        margin: 1em;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-size: small;
+    }
+
+    .container .section .nav a:link,a:visited {
+        color: darkblue;
+    }
+
+    .container .section .nav a:hover,a:active {
+        color: rgb(108, 108, 194);
+    }
+</style>
 <body>
+
     <div class="container">
         <div class="section">
             <h1>Title</h1>
             <div id="app"></div>
+            <div class="nav">
+                <a href="/login">Login</a>
+                <a href="/forgot">Forgot</a>
+                <a href="/register">Register</a>
+            </div>
         </div>        
     </div>
 
     <!--JS-->
 
-    <style>
-        html,
-        body {
-            height: 100%;
-            background: cornflowerblue;
-            margin: 0;
-        }
-
-        .container {
-            height: 100%;
-            display: flex;
-            align-items: top;
-            justify-content: center;
-        }
-
-        .container .section {
-            text-align: center;
-            margin-top: 5%;
-            width: 50%;
-        }
-
-        .container .section #app {
-            text-align: left;            
-            height: auto;
-            width: 100%;
-            background-color: white;
-            padding: 1em 1em 1em 1em;
-        }
-    </style>
+    
 </body>
 
 </html>

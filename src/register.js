@@ -3,7 +3,7 @@ import ElementPlus from 'element-plus'
 import locale from 'element-plus/lib/locale/lang/tr'
 import subutai from './lib/SubutaiVue';
 
-import comp from './components/Welcome.vue';
+import comp from './components/Register.vue';
 
 let app = document.getElementById("app");
 app.innerHTML = "";
