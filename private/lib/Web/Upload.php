@@ -2,8 +2,6 @@
 
 namespace Web {
 
-    define("TEST","");
-
     use Exception;
     use stdClass;
 
