@@ -17,11 +17,6 @@ define("HTTP_TICKET","HTTP_TICKET");
         }
     }
 
-    interface Page {
-        public static function scritp(string $head, string $body) : void;
-        public static function json( $data ) : void;
-    }
-
 
     class Web
     {
