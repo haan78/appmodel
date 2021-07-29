@@ -22,7 +22,6 @@ services:
         volumes:
             - "./public/index.php:/public/index.php:consistent"
             - "./private:/private:consistent"
-            - "./vendor:/vendor:consistent"
         ports:
             - "9000:9000"
     redis:

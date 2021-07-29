@@ -7,42 +7,30 @@ export default {
         return this.ajaxActivationCount > 0;
     },
 
-    defaultError(msg, details) {
-        console.log(details);
-    },
-
-    receiveFromCookie(name) {
-
-        var cookie= (name,def) => {
-            //return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
-            const value = "; " + document.cookie;
+    cookie(name,dontremove) {
+        const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
             if (parts.length == 2) {
                 const vlu = parts.pop().split(";").shift();
                 const decode_vlu = decodeURIComponent(vlu);
                 const replace_vlu = decode_vlu.replace(/[+]/g, ' ');
-                return replace_vlu;
+                if ( !dontremove ) {
+                    window.document.cookie = encodeURIComponent(name)+"=; Max-Age=0";
+                }
+                return JSON.parse(replace_vlu);
             } else {
-                return ( typeof def !== "undefined" ? def : false );
+                return false;
             }
-        }
+    },
 
-        var removeCookie = (name) => {
-            if ( cookie(name,false) !== false ) {
-                window.document.cookie = encodeURIComponent(name)+"=; Max-Age=0";
-            }
-        };
-
-        var v = cookie(name);
-        removeCookie(name);
-        return JSON.parse(v);
+    ajaxDefaultError:(msg, details) => {
+        console.log([msg,details]);
     },
 
     ajax(url, data, onSuccess, onError) {
-
         let self = this;
         let config = {};
-        var err = (typeof onError === "function" ? onError : self.defaultError);
+        var err = (typeof onError === "function" ? onError : self.ajaxDefaultError);
         self.ajaxActivationCount += 1;
         axios.post(url, (data ? data : null), config).then((response) => {
             if (self.ajaxActivationCount > 0) {
