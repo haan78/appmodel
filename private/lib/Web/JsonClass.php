@@ -7,10 +7,14 @@ namespace Web {
     use Throwable;
     use Error;
 
+class JsonClassException extends Exception {
+}
+
 class JsonClass {
 
-        public static string $jsonpName = "jsonp";
+        public static string $JSONP = "jsonp";
         public static int $JSON_FLAGS = 0;
+        public static bool $SHOW_ERROR_DETAILS = true;
 
 
         public static function post() {
@@ -24,13 +28,14 @@ class JsonClass {
                     if ($jle == JSON_ERROR_NONE) {
                         return $jd;
                     } else {
-                        throw new \Exception("Post data cannot be parsed into Json / $jle");
+                        throw new JsonClassException("Post data cannot be parsed into Json / $jle",201);
                     }
                 } else {
                     return null;
                 }
             }
         }
+        
         public static function pathInfo(int $ind) {
             if (isset($_SERVER["PATH_INFO"])) {
                 $pi = explode("/", trim($_SERVER["PATH_INFO"]));
@@ -49,35 +54,23 @@ class JsonClass {
             }
         }
 
-        public static function client(): string {
-            if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-                return trim(explode(",", $_SERVER["HTTP_X_REAL_IP"])[0]);
-            } elseif (isset($_SERVER["HTTP_X_REAL_IP"])) {
-                return trim($_SERVER["HTTP_X_REAL_IP"]);
-            } elseif (isset($_SERVER["REMOTE_ADDR"])) {
-                return trim($_SERVER["REMOTE_ADDR"]);
-            } else {
-                return "";
-            }
-        }
-
         private function getMethodName($definer) : string {
             if ( is_int($definer) ) {
                 $res = static::pathInfo($definer);
                 if ( is_string($res) && !empty($res) ) {
                     return trim($res);
                 } else {
-                    throw new Exception("Path info number $definer doesn't  exist");
+                    throw new JsonClassException("Path info number $definer doesn't  exist",102);
                 }
             } elseif ( is_string($definer) ) {
                 $res = filter_input(INPUT_GET,  $definer, FILTER_SANITIZE_STRING);
                 if (is_string($res) && !empty($res) ) {
                     return trim($res);
                 } else {
-                    throw new Exception("URL query name $definer doesn't exist");
+                    throw new JsonClassException("URL query name $definer doesn't exist",103);
                 }
             } else {
-                throw new Exception("Method definer must be path info number or URL query name");
+                throw new JsonClassException("Method definer must be path info number or URL query name",101);
             }
         }
 
@@ -90,10 +83,10 @@ class JsonClass {
                     if (($rfm->isPublic()) && (!$rfm->isConstructor()) && (!$rfm->isDestructor()) && (!$rfm->isStatic())) {
                         $result = $this->doSuccess($rfm->invokeArgs($this, array(static::post())));
                     } else {
-                        throw new Exception("Method is not callable");
+                        throw new JsonClassException("Method is not callable",302);
                     }
                 } else {
-                    throw new Exception("Method $methodName dose not exist");
+                    throw new JsonClassException("Method $methodName dose not exist",301);
                 } 
             } catch (Error $err) {
                 $result = $this->doError($err);
@@ -104,10 +97,10 @@ class JsonClass {
         }
 
         protected function doResponse($json) {
-            $p = filter_input(INPUT_GET,  self::$jsonpName, FILTER_SANITIZE_STRING);
+            $p = filter_input(INPUT_GET,  self::$JSONP, FILTER_SANITIZE_STRING);
             if (($p != null) && ($p != false)) {
                 header('Content-Type: application/javascript; charset=utf-8');
-                echo "if (typeof " . $p . " === 'function' ) $p( " . json_encode($json, true) . " ); else alert('Function " . $p . " not found.'); ";
+                echo "if (typeof $p === 'function' ) $p( " . json_encode($json, static::$JSON_FLAGS) . " ); else consloe.error('Function $p not found.'); ";
             } else {
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode($json, static::$JSON_FLAGS);
@@ -119,13 +112,16 @@ class JsonClass {
         }
 
         protected function doError(Throwable $ex) {
-            return array("success" => false, "data" => [
+            $arr = array("success" => false, "data" => [
                 "message" => $ex->getMessage(),
                 "code" => $ex->getCode(),
-                "line" => $ex->getLine(),
-                "file" => $ex->getFile(),
                 "class" => get_class($ex)
             ]);
+            if ( !$ex instanceof JsonClassException && static::$SHOW_ERROR_DETAILS) {
+                $arr["data"]["file"] = $ex->getFile();
+                $arr["data"]["line"] = $ex->getLine();
+            } 
+            return $arr;
         }
     }
 }
