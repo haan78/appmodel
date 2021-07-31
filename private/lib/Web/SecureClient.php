@@ -6,6 +6,7 @@ use Exception;
 class SecureClient {
         public static int $checkFailStatus = 0;
         public static string $SESSION_NAME = "CLIENT_ID";
+        
         public static function client() : string {
             if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
                 return trim(explode(",",$_SERVER["HTTP_X_REAL_IP"])[0]);

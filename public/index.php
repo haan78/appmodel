@@ -1,13 +1,23 @@
 <?php
-require_once "/private/lib/Web/Web.php";
+
+use Web\ErrorPage;
+use Web\PathInfo;
+
+require_once "/private/lib/Web/PathInfo.php";
+require_once "/private/lib/Web/ErrorPage.php";
 require_once "/private/helper/settings.php";
-require_once "/private/helper/error.php";
 
-use Web\Web;
+\Web\ErrorPage::handler("/private/temps/Error.html");
+$action = PathInfo::item(0);
 
-$action = Web::path(0, "main");
-
-$file = "/private/$action.php";
-if (file_exists($file)) {
-    include $file;
+if ($action !== false) {
+    $file = "/private/$action.php";
+    if (file_exists($file)) {        
+        include $file;
+    } else {
+        throw new Exception("File not found / $file");
+    }
+} else {
+    throw new Exception("No path info");
 }
+
