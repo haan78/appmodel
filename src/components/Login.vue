@@ -1,5 +1,5 @@
 <template>
-  {{ message }}
+  <h2>Login</h2>
   <el-form :rules="rules" :model="model" ref="FORM" label-position="top" action="/login" method="POST">
     <el-form-item label="Email" prop="email">
       <el-input v-model="model.email" name="email" suffix-icon="el-icon-user"></el-input>
@@ -53,7 +53,7 @@ export default {
   },
   created() {
     console.log(Cookie.get());
-    this.message = this.$subutai.receiveFromCookie("status");
+    this.message = this.$subutai.cookie("status");
     console.log(this.message);
     console.log(Cookie.get());
   },

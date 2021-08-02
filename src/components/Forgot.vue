@@ -1,4 +1,5 @@
 <template>
+  <h2>Forgot</h2>
   <el-form :rules="rules" :model="model" ref="FORM" label-position="top" action="/login" method="POST">
     <el-form-item label="Email" prop="email">
       <el-input v-model="model.email" name="email" suffix-icon="el-icon-user"></el-input>

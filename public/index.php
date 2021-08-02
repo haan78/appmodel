@@ -8,15 +8,11 @@ require_once "/private/lib/Web/ErrorPage.php";
 require_once "/private/helper/settings.php";
 
 ErrorPage::handler("/private/temps/Error.html");
-$action = PathInfo::item(0);
+$action = (PathInfo::item(0) ? PathInfo::item(0) : "main");
 
-if ($action !== false) {
-    $file = "/private/$action.php";
-    if (file_exists($file)) {
-        include $file;
-    } else {
-        throw new Exception("File not found / $file");
-    }
+$file = "/private/$action.php";
+if (file_exists($file)) {
+    include $file;
 } else {
-    throw new Exception("No path info");
+    throw new Exception("File not found / $file");
 }
