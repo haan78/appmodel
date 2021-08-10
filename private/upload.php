@@ -20,7 +20,7 @@ if ( !empty($_FILES) ) {
         header("Content-Type: ".$ft);
         echo $c;
     } else {
-        throw new Exception("Ther is no file or Id so nothing to do!");
+        throw new Exception("There is no file or Id so nothing to do!");
     }
 }
 
