@@ -1,5 +1,5 @@
 <template>
-    {{ message }}
+    <h2>Register</h2>
     <el-form :rules="rules" :model="model" ref="FORM" label-position="top" action="/login" method="POST">
     <el-form-item label="Email" prop="email">
       <el-input v-model="model.email" name="email" suffix-icon="el-icon-user"></el-input>
@@ -16,24 +16,19 @@
       </el-input>
     </el-form-item>
     <el-button type="primary" style="width:100%; margin-top: 1em;" @click="formEnter()" >Enter</el-button>
-    <br>
-    <div class="lnk">
-      <a href="/register" type="primary" >Register</a>
-      <a href="/forgot" type="primary" >Forgot Password?</a>
-    </div>
   </el-form>
 </template>
 <style lang="scss" scoped>
-    .test1 {
-        color: brown;
-        font-size: 1cm;
-    }
+  .img {
+    width: 60xp;
+    height: 27px;
+    padding-top: 5px;
+  }
 </style>
 <script>
 export default {
   data() {
     return {
-      message : null,
       rules:{
         user:[
           { required: true, message: 'Email is required', trigger: 'blur' },
@@ -53,9 +48,6 @@ export default {
         pass:null
       }
     };
-  },
-  created() {
-    this.message = this.$subutai.cookie("message","AAAA");
   },
   methods:{
     formEnter() {

@@ -26,7 +26,7 @@ namespace Web {
             if (self::$arr === false) {
                 self::$arr = self::parse();
             }
-            if ( isset(self::$arr[$index]) ) {
+            if ( isset(self::$arr[$index]) && !empty(self::$arr[$index]) ) {
                 return trim(self::$arr[$index]);
             } else {
                 return false;

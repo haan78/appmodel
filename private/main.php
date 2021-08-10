@@ -14,5 +14,5 @@ if (user::validate()) {
         __DIR__ . "/temps/temp1.html"
     );
 } else {
-    header("Refresh:0; url=/login?s=2");
+    header("Refresh:0; url=/login");
 }
