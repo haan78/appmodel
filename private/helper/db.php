@@ -3,10 +3,17 @@ require_once __DIR__ . "/../lib/MySqlTool/MySqlToolCall.php";
 require_once "/vendor/autoload.php";
 
 class db {
+    public static $SslFile = null;
     private static $mongodb = null;
     public static function maria() {
         $link = mysqli_init();
         mysqli_options($link, MYSQLI_OPT_CONNECT_TIMEOUT, 20);
+        if ( is_string(self::$SslFile) ) {
+            mysqli_options($link,MYSQLI_OPT_SSL_VERIFY_SERVER_CERT,true);
+            mysqli_ssl_set($link,null,null,self::$SslFile,null,null);
+        }
+        
+
         mysqli_real_connect($link,MARIA_HOST,MARIA_USER,MARIA_PASS,MARIA_SCHEMA,MARIA_PORT);        
         mysqli_set_charset($link, "utf8");
         return $link;
