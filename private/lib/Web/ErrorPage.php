@@ -2,9 +2,8 @@
 
 namespace Web {
     class ErrorPage {
-
-        public static function handler( string $htmlFile ) {
-
+        public static array $errors = [ E_ERROR, E_CORE_ERROR, E_USER_ERROR, E_COMPILE_ERROR ];
+        public static function handler( string $htmlFile = "" ) {
 
             error_reporting(E_ALL);
             //ini_set('display_errors', TRUE);
@@ -13,13 +12,14 @@ namespace Web {
 
 
             register_shutdown_function(function() use($htmlFile) {
-                $er = error_get_last();
-                if (!is_null($er) && $er["type"] == E_ERROR) {
+                $er = error_get_last();  
+                if (!is_null($er) && isset($er["type"]) && in_array($er["type"],ErrorPage::$errors) ) {
                     $type = $er["type"];
                     $message = $er["message"];
                     $file = $er["file"];
                     $line = $er["line"];
-                    if (file_exists($htmlFile)) {
+                    
+                    if ( !empty($htmlFile) && file_exists($htmlFile)) {                        
                         echo str_replace(["<!--TYPE-->","<!--MESSAGE-->","<!--FILE-->","<!--LINE-->"],[$type,$message,$file,$line],file_get_contents($htmlFile));
                     } else {
                         ?>
