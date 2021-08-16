@@ -1,7 +1,10 @@
 <?php
 namespace MySqlTool {
-    class MySqlConnection {
-        public static array $options = [
+
+use Exception;
+
+class MySqlToolConnection {
+        private static array $defaultOptions = [
             "timeout"=>20,
             "host"=>"localhost",
             "user"=>"root",
@@ -16,11 +19,10 @@ namespace MySqlTool {
             "ssl_ca_path"=>null,
             "ssl_cipher" => null,
             "strict" => true
-        ];       
-    
-        public static function link(?array $options = null) {
-    
-            $op = self::$options;
+        ];
+
+        private static function getAllOptions(?array $options) : object {
+            $op = self::$defaultOptions;
             if ( !is_null($options) ) {
                 $keys = array_keys($op);
                 for($i=0; $i<count($keys); $i++ ) {
@@ -30,7 +32,24 @@ namespace MySqlTool {
                     }
                 }
             }
-            $o = (object)$op;
+            return (object)$op;
+        }
+
+        public static function setDefault(string $name, $value) :  void {
+            if ( array_key_exists($name,self::$defaultOptions) ) {
+                self::$defaultOptions[$name] = $value;
+            } else {
+                throw new Exception("There is no such kind a property like $name");
+            }
+        }
+
+        public static function getDefaults() :array {
+            return self::$defaultOptions;
+        }
+    
+        public static function link(?array $options = null) {
+    
+            $o = self::getAllOptions($options);
     
             if ($o->strict) {
                 mysqli_report(MYSQLI_REPORT_STRICT);
