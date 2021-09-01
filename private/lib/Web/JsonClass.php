@@ -10,12 +10,29 @@ namespace Web {
 class JsonClassException extends Exception {
 }
 
+class JsonClassAuthException extends Exception {
+    private array $details;
+    public function __construct($message = null,array $details = []) {
+        parent::__construct($message, 0);
+        $this->details = $details;
+    }
+
+    public function getDetails() : array {
+        return $this->details;
+    }
+}
+
 class JsonClass {
 
         public static string $JSONP = "jsonp";
         public static int $JSON_FLAGS = 0;
-        public static bool $SHOW_ERROR_DETAILS = true;
+        public static bool $SHOW_ERROR_DETAILS = false;
+        public static bool $LOG_ONYL_SUCCESS_RESULTS = true;
 
+        public static function debugMode() {
+            self::$SHOW_ERROR_DETAILS = true;
+            self:: $JSON_FLAGS = JSON_PRETTY_PRINT;
+        }
 
         public static function post() {
             if (!empty($_POST)) {
@@ -74,14 +91,33 @@ class JsonClass {
             }
         }
 
+        /*@override*/
+        protected function log(string $method, $result,$post) : void { 
+        }
+
+        /*@override*/
+        protected function logError($method,$result,$post) : void {
+
+        }
+
+        /*@override*/
+        protected function auth(string $method, callable $abort) : void {
+        }
+
         public function __construct($methodDefiner) {
+            $post = null;
             $result = null;
+            $methodName = null;
             try {
                 $methodName = $this->getMethodName($methodDefiner);
                 if (method_exists($this, $methodName)) {
                     $rfm = new ReflectionMethod($this, $methodName);
                     if (($rfm->isPublic()) && (!$rfm->isConstructor()) && (!$rfm->isDestructor()) && (!$rfm->isStatic())) {
-                        $result = $this->doSuccess($rfm->invokeArgs($this, array(static::post())));
+                        $this->auth($methodName,function(string $message, array $details = []) {
+                            throw new JsonClassAuthException($message,$details);
+                        });
+                        $post = static::post();
+                        $result = $this->doSuccess($rfm->invokeArgs($this, array($post)));
                     } else {
                         throw new JsonClassException("Method is not callable",302);
                     }
@@ -93,10 +129,17 @@ class JsonClass {
             } catch (Exception $ex) {
                 $result = $this->doError($ex);
             }
+
             $this->doResponse($result);
+
+            if ( !is_null($result) && $result["success"] ) {
+                $this->log($methodName,$result,$post);
+            } else {
+                $this->logError($methodName,$result,$post);
+            }            
         }
 
-        protected function doResponse($json) {
+        protected function doResponse($json) : void {
             $p = filter_input(INPUT_GET,  self::$JSONP, FILTER_SANITIZE_STRING);
             if (($p != null) && ($p != false)) {
                 header('Content-Type: application/javascript; charset=utf-8');
@@ -112,16 +155,23 @@ class JsonClass {
         }
 
         protected function doError(Throwable $ex) {
-            $arr = array("success" => false, "data" => [
-                "message" => $ex->getMessage(),
-                "code" => $ex->getCode(),
-                "class" => get_class($ex)
-            ]);
-            if ( !$ex instanceof JsonClassException && static::$SHOW_ERROR_DETAILS) {
-                $arr["data"]["file"] = $ex->getFile();
-                $arr["data"]["line"] = $ex->getLine();
-            } 
-            return $arr;
+            $data = [
+                "message" => $ex->getMessage()                
+            ];
+            if ($ex instanceof JsonClassAuthException) {                
+                $data["class"] = get_class($ex);                
+                $data["details"] = $ex->getDetails();
+            } elseif ($ex instanceof JsonClassException) {
+                $data["class"] = get_class($ex);
+            } elseif (static::$SHOW_ERROR_DETAILS) {
+                $data["code"] = $ex->getCode();
+                $data["class"] = get_class($ex);
+                $data["file"] = $ex->getFile();
+                $data["line"] = $ex->getLine();
+            } else {
+                $data["code"] = $ex->getCode();
+            }
+            return array("success" => false, "data" => $data);
         }
     }
 }

@@ -40,7 +40,7 @@ services:
             TZ: "Asia/Istanbul"
             MYSQL_ROOT_PASSWORD: "40801772"
         volumes:
-            - "./src/sql/init/maria_master:/docker-entrypoint-initdb.d"
+            ##- "./src/sql/init/maria_master:/docker-entrypoint-initdb.d"
             - ".mariadbvol:/var/lib/mysql:rw"
         expose: 
             - "3306"
