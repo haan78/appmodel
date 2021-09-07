@@ -11,6 +11,13 @@ export default {
     aPhone :function(str) {
         var regx = /^[+]*[(]{0,1}[0-9]{1,3}[)]{0,1}[-\s./0-9]*$/g;
         return regx.test(str);
+    },
+    aTCKN:function(str) {
+        if ( this.aNumber(str) && str.length == 11 ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     

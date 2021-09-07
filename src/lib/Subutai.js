@@ -2,40 +2,89 @@ import axios from "axios";
 
 export default {
     ajaxActivationCount: 0,
-   
+    COOKIE_NAME : "SUBUTAI",
+    COOKIE_DATA : false,
+
+    onStart : function() {},
+    onEnd : function() {},
+
     isLoading() {
         return this.ajaxActivationCount > 0;
     },
 
-    cookie(name,dontremove) {
-        const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length == 2) {
-                const vlu = parts.pop().split(";").shift();
-                const decode_vlu = decodeURIComponent(vlu);
-                const replace_vlu = decode_vlu.replace(/[+]/g, ' ');
-                if ( !dontremove ) {
-                    window.document.cookie = encodeURIComponent(name)+"=; Max-Age=0";
+    get(options) {
+        var op = {
+            "dontremove":false,
+            "refresh":false
+        };
+
+        if ( typeof options == "object" && typeof options !== null ) {
+            Object.keys(op).forEach((key)=>{
+                if ( options.hasOwnProperty(key) ) {
+                    op[key] = options[key];
                 }
-                return JSON.parse(replace_vlu);
-            } else {
-                return false;
-            }
+            });
+        }        
+        
+        if ( op.refresh || this.COOKIE_DATA === false ) {
+            this.COOKIE_DATA = this.cookie(op.dontremove);
+        }
+        return this.COOKIE_DATA;
     },
 
-    ajaxDefaultError:(msg, details) => {
-        console.log([msg,details]);
+    cookie(dontremove) {
+        const value = "; " + window.document.cookie;
+        const parts = value.split("; " + this.COOKIE_NAME + "=");
+        if (parts.length == 2) {
+            const vlu = parts.pop().split(";").shift();
+            const decode_vlu = decodeURIComponent(vlu);
+            const replace_vlu = decode_vlu.replace(/[+]/g, ' ');
+            if (!dontremove) {
+                window.document.cookie = encodeURIComponent(this.COOKIE_NAME) + "=; Max-Age=0";
+            }
+            
+            var result = false;
+            try {
+                result = JSON.parse(replace_vlu);
+            } catch {
+                result = replace_vlu;
+            }            
+            return result;
+        } else {
+            return false;
+        }
+    },
+
+    ajaxDefaultError: (msg, details) => {
+        console.log([msg, details]);
+    },
+
+    up() {        
+        if (this.ajaxActivationCount === 0) {
+            if (  typeof this.onStart ===  "function") {
+                this.onStart();
+            }
+        } 
+        this.ajaxActivationCount += 1;       
+    },
+
+    down() {
+        if ( this.ajaxActivationCount > 0 ) {
+            this.ajaxActivationCount -= 1;       
+        } 
+        if ( this.ajaxActivationCount === 0 ) {
+            if (  typeof this.onEnd ===  "function") {
+                this.onEnd();
+            }
+        }
     },
 
     ajax(url, data, onSuccess, onError) {
         let self = this;
         let config = {};
         var err = (typeof onError === "function" ? onError : self.ajaxDefaultError);
-        self.ajaxActivationCount += 1;
-        axios.post(url, (data ? data : null), config).then((response) => {
-            if (self.ajaxActivationCount > 0) {
-                self.ajaxActivationCount -= 1;
-            }
+        self.up();
+        axios.post(url, (data ? data : null), config).then((response) => {            
             if (typeof response.data === "object" && typeof response.data.success === "boolean") {
                 if (response.data.success) {
                     if (typeof onSuccess === "function") {
@@ -47,11 +96,10 @@ export default {
             } else {
                 err("Ajax response is unexpected", response.data);
             }
+            self.down();
         }).catch((error) => {
-            if (self.ajaxActivationCount > 0) {
-                self.ajaxActivationCount -= 1;
-            }
             err(error.message, error);
+            self.down();
         });
     }
 }

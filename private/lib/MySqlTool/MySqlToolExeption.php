@@ -3,7 +3,7 @@ namespace MySqlTool {
     class MySqlToolDatabaseException extends \Exception {
         private $sql;
 
-        public function __construct($message, $code = 0, $sql = "", Exception $previous = null) {
+        public function __construct($message, $code = 0, $sql = "", \Exception $previous = null) {
             parent::__construct($message, $code, $previous);
             $this->sql = $sql;
         }
@@ -20,7 +20,7 @@ namespace MySqlTool {
     class MySqlToolMethodException extends \Exception {
         private $method;
 
-        public function __construct($message, $code = 0, $method = "", Exception $previous = null) {
+        public function __construct($message, $code = 0, $method = "", \Exception $previous = null) {
             parent::__construct($message, $code, $previous);
             $this->method = $method;
         }

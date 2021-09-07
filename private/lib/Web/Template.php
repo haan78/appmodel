@@ -3,6 +3,7 @@ namespace Web {
     class Template {
         public static int $time = 120;
         public static bool $useRnd = true;
+        public static string $COOKIE_NAME = "SUBUTAI";
 
         private array $scripts;
         private string $file;
@@ -34,9 +35,7 @@ namespace Web {
         }
     
         private function data(array $data) {
-            foreach( $data as $k => $v ) {
-                setcookie($k, $v, time()+static::$time);
-            }
+            setcookie(self::$COOKIE_NAME, json_encode($data), time()+static::$time);            
         }
 
         public static function html(array $scripts, string $file, array $data = []) : void {

@@ -52,7 +52,7 @@ class MySqlToolConnection {
             $o = self::getAllOptions($options);
     
             if ($o->strict) {
-                mysqli_report(MYSQLI_REPORT_STRICT);
+                mysqli_report(MYSQLI_REPORT_STRICT | MYSQLI_REPORT_ERROR);
             }
             $link = mysqli_init();
             mysqli_options($link, MYSQLI_OPT_CONNECT_TIMEOUT,$o->timeout);
