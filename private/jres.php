@@ -14,6 +14,10 @@ class jres extends \Web\JsonClass {
     public function test() {
         return true;
     }
+
+    public function deneme($post) {
+        return $post;
+    }
 }
 
 new jres(1);

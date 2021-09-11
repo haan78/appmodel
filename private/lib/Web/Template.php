@@ -35,7 +35,9 @@ namespace Web {
         }
     
         private function data(array $data) {
-            setcookie(self::$COOKIE_NAME, json_encode($data), time()+static::$time);            
+            if ( !empty($data) ) {
+                setcookie(self::$COOKIE_NAME, json_encode( $data), time()+static::$time); 
+            }           
         }
 
         public static function html(array $scripts, string $file, array $data = []) : void {

@@ -9,4 +9,5 @@ $module = "reset";
         "js/$module.js"
     ],
     __DIR__ . "/temps/temp1.html"
+    //,["Test"=>"1234"]
 );
