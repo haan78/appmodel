@@ -12,34 +12,36 @@ namespace MongoTools {
     class MongoUpload
     {
 
-        private static $fileControlFnc = null;
 
-
-        public static float $maxTotalUpSizeMb = 8; //8mb
         public static int $maxUploadCount = 10;
-        public static bool $onlyImages = true;
-        public static $type = "";
-        //public static array $mimeTypes = ["image/png", "image/jpeg", "image/gif", "application/pdf", "image/svg+xml", "image/webp", "image/tiff"];
+        public static float $maxTotalUpSizeMb = 8; //8mb
+        public static float $maxUpSizeMb = 8;
+        public static array $types = ["image/png", "image/jpeg", "image/gif", "application/pdf", "image/svg+xml", "image/webp", "image/tiff"];
 
         private static function controlFiles(): void
         {
 
-            if (empty($_FILES)) {
-                throw new Exception("There is no upload file");
-            } else {
+            if (!empty($_FILES)) {
                 if ( count( array_keys($_FILES) ) > static::$maxUploadCount ) {
                     throw new Exception("Maximum upload limit is ".static::$maxUploadCount." files");
                 }
                 $total = 0;
                 foreach ($_FILES as $f) {
-                    $total += intval($f["size"]);
-                    if (!is_null(static::$fileControlFnc)) {
-                        call_user_func_array(static::$fileControlFnc, $f);
+                    $size = intval($f["size"]);
+                    $type = strtolower($f["type"]);
+                    $name = $f["name"];
+                    if ( !empty(self::$types) && !in_array( $type,self::$types ) ) {
+                        throw new Exception("MIME type $type of the file $name is not allowed ");
+                    } elseif ( $size > self::$maxUpSizeMb * 1024 * 1024 ) {
+                        throw new Exception("Maximum upload size of the file $name is ".self::$maxUpSizeMb."Mb");
                     }
+                    $total += $size;
                 }
                 if ($total > (static::$maxTotalUpSizeMb * 1024 * 1024) ) {
                     throw new Exception("Maximum upload size is ".static::$maxTotalUpSizeMb."Mb");
                 }                
+            } else {
+                throw new Exception("There is no upload file");
             }
         }
 
