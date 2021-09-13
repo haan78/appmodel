@@ -20,6 +20,7 @@ services:
             context: ./conf
             dockerfile: php-fpm-dockerfile
         volumes:
+            - "./conf/settings.development.php:/etc/settings.php"
             - "./public/index.php:/public/index.php:consistent"
             - "./private:/private:consistent"
         ports:

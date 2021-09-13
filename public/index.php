@@ -1,8 +1,8 @@
 <?php
 
+require_once "/etc/settings.php";
 require_once "/private/lib/Web/PathInfo.php";
 require_once "/private/lib/Web/Page.php";
-require_once "/private/helper/settings.php";
 
 use Web\Page;
 use Web\PathInfo;
