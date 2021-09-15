@@ -22,7 +22,8 @@ RUN rm -rf /var/cache/apk/*
 RUN mkdir /public
 COPY ./php-fpm-ex.conf /etc/php7/php-fpm.conf
 
-COPY ./session_redis.ini /etc/php7/conf.d/session_redis.ini
+##Redis session
+##COPY ./session_redis.ini /etc/php7/conf.d/session_redis.ini
 
 ENV COMPOSER /etc/composer.json
 COPY ./composer.json /etc/composer.json
