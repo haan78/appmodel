@@ -77,14 +77,4 @@ class User {
     private static function setCookie($data) : void {
         setcookie("UserName", $data["user"], time()+3600);
     }
-
-    public static function clear() {
-        $s = new SessionDefault();
-        $s->clear();
-    }
-
-    public static function kill() {
-        $s = new SessionDefault();
-        $s->kill();
-    }
 }

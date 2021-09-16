@@ -3,6 +3,18 @@
 namespace Web {
     class PathInfo {
         private static $arr = false;
+
+        public static function remouteAddr() : string {
+            if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+                return trim(explode(",",$_SERVER["HTTP_X_REAL_IP"])[0]);
+            } elseif ( isset($_SERVER["HTTP_X_REAL_IP"]) ) {
+                return trim($_SERVER["HTTP_X_REAL_IP"]);
+            } elseif ( isset($_SERVER["REMOTE_ADDR"]) ) {
+                return trim($_SERVER["REMOTE_ADDR"]);
+            } else {
+                return "";
+            }
+        }
         
         private static function parse() : array {
             if (isset($_SERVER["PATH_INFO"])) {
@@ -15,6 +27,7 @@ namespace Web {
                 return [];
             }
         }
+
         public static function count() : int {
             if (self::$arr === false) {
                 self::$arr = self::parse();

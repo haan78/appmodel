@@ -12,31 +12,64 @@ namespace MongoTools {
         private $savePath;
         private $sessionName;
         private Collection $coll;
-        private bool $deleteRecord = false;
 
-        public static function init($connection,string $collectionName, bool $deleteRecord = false, int $lifeTime = 1 * 60) : void {
-            $db = null;
-            if ( is_string($connection) ) {
-                $db = new Client($connection);
-            } elseif ( $connection instanceof Client ) {
-                $db = $connection;
-            } else {
-                throw new Exception("Connection must be connection string or MongoDbClinet");
+        private static bool $initialized = false;
+        private static string $USER_ID; 
+
+        public static function init(Collection $coll,string $user_id, int $lifeTime = 1 * 60) : void {
+            if ( self::$initialized ) {
+                throw new Exception("This method has already been performed");
+            } elseif ( isset($_SESSION) ) {
+                throw new Exception("Session has already started");
             }
-            $coll = $db->selectDatabase("test")->selectCollection($collectionName);
-            $coll->createIndex(["session_id"=>1, "active"=>1]);
-            $coll->createIndex(["expires"=>1, "active"=>1]);
-            $handler = new MongoSession($coll,$deleteRecord);
+            $name = $coll->getCollectionName();
+            $coll->createIndexes([
+                [ "key"=>[ "time"=>1], "name"=>$name."_ind_1" ],
+                [ "key"=>[ "session_id"=>1, "active"=>1], "name"=>$name."_ind_2" ],
+                [ "key"=>[ "expires"=>1, "active"=>1 ], "name"=>$name."_ind_3" ],
+                [ "key"=>[ "user_id"=>1, "active"=>1 ], "name"=>$name."_ind_4" ]
+            ]);
+            $handler = new MongoSession($coll);
             ini_set('session.gc_maxlifetime', $lifeTime);
-            session_set_save_handler($handler, false);
-            session_start();
-            
+            self::$USER_ID = $user_id;
+            session_set_save_handler($handler, false); 
+            session_start(); 
+            self::$initialized = true;      
         }
 
-        public function __construct(Collection $coll, bool $deleteRecord = false)
+        public static function clinetValidate(Collection $coll) : int {
+            if ( !self::$initialized ) {
+                throw new Exception(__CLASS__."::init function must be called first" );
+            }
+            self::getClientInfo($agent,$address);
+            $session_id = session_id();
+
+            $result = $coll->findOne([ "session_id"=>$session_id, "active"=>true ],["sort" => ["time"=>-1] ]);
+            if ( !is_null($result) ) {
+                if ( $result["address"] == $address ) {
+                    if ( $result["agent"] == $agent ) {
+                        return 0;
+                    } else {
+                        return 3;
+                    }
+                } else {
+                    return 2;
+                }
+            } else {
+                return 1;
+            }
+        }
+
+        public static function userCount(Collection $coll,string $user_id) : int {
+            if ( !self::$initialized ) {
+                throw new Exception(__CLASS__."::init function must be called first" );
+            }
+            return $coll->count(["user_id"=>$user_id, "active"=>true]);
+        }
+
+        public function __construct(Collection $coll)
         {
             $this->coll = $coll;
-            $this->deleteRecord = $deleteRecord;
         }
 
         public function open($savePath, $sessionName) {
@@ -53,7 +86,6 @@ namespace MongoTools {
         }
 
         public function read($id) {
-
             $result = $this->coll->findOne([ "session_id"=>$id, "active"=>true ]);
             if ( !is_null($result) && !empty($result) && $result["data"] ) {
                 return (string)$result["data"];
@@ -62,6 +94,23 @@ namespace MongoTools {
             }
         }
 
+        private static function getClientInfo(&$agent,&$address) : void {
+            $agent = "";
+            $address = "";
+            if ( isset($_SERVER) ) {
+                if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+                    $agent = trim($_SERVER['HTTP_USER_AGENT']);
+                }
+                if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+                    $address = trim(explode(",",$_SERVER["HTTP_X_REAL_IP"])[0]);
+                } elseif ( isset($_SERVER["HTTP_X_REAL_IP"]) ) {
+                    $address = trim($_SERVER["HTTP_X_REAL_IP"]);
+                } elseif ( isset($_SERVER["REMOTE_ADDR"]) ) {
+                    $address = trim($_SERVER["REMOTE_ADDR"]);
+                }
+            }
+        }   
+
         public function write($id, $data) {
             if ( empty($data) ) {
                 return true;
@@ -69,16 +118,20 @@ namespace MongoTools {
             $fields = [
                 "session_id"=>$id,
                 "data"=>$data,
-                "last_modified" =>new  UTCDateTime(),
+                "last_modified" =>new UTCDateTime(),
                 "life" => ini_get('session.gc_maxlifetime'),
                 "name" => $this->sessionName,
                 "time"=>time(),
                 "active"=>true
             ]; 
+            self::getClientInfo($agent,$address);
             $insert = [
-                "begin" => new  UTCDateTime(),
+                "user_id"=>static::$USER_ID,
+                "begin" => new UTCDateTime(),
                 "end" => null,
-                "duration" => (-1*time())
+                "duration" => (-1*time()),
+                "agent" => $agent,
+                "address" => $address
             ];           
             try {
                 $this->coll->updateOne(["session_id"=>$id, "active"=>true ], [ '$set'=>$fields, '$setOnInsert'=>$insert ], array("upsert"=>true));
@@ -90,24 +143,20 @@ namespace MongoTools {
 
         public function destroy($id) {
             try {
-                $mt = new  UTCDateTime();
-                if ( $this->deleteRecord ) {
-                    $this->coll->deleteOne([ 'session_id' => $id, "active" => true ]);
-                } else {
-                    $this->coll->updateOne([ 
-                        'session_id' => $id,
-                        "active" => true 
+                $mt = new UTCDateTime();
+                $this->coll->updateOne([ 
+                    'session_id' => $id,
+                    "active" => true 
+                ],
+                [
+                    '$inc'=>[
+                        "duration"=>time()
                     ],
-                    [
-                        '$inc'=>[
-                            "duration"=>time()
-                        ],
-                        '$set'=>[
-                            "active" => false,
-                            "end" => $mt
-                        ]
-                    ]);
-                }
+                    '$set'=>[
+                        "active" => false,
+                        "end" => $mt
+                    ]
+                ]);
             } catch(Exception $ex) {
                 return false;
             }            
@@ -122,19 +171,12 @@ namespace MongoTools {
             return true;
         }
 
-        public function gc($maxlifetime) {
-            
+        public function gc($maxlifetime) {            
             $t = time();
             $c = 0;
             try {
-                if ( $this->deleteRecord ) {
-                    $res = $this->coll->deleteMany(['time' => ['$lt' => $t ], "active" => true ]);
-                    $c = $res->getDeletedCount();  
-                                  
-                } else {
-                    $res = $this->coll->updateMany(['time' => ['$lt' => ($t - $maxlifetime) ], "active" => true ], ['$inc'=>["duration"=>$t],'$set'=>["active" => false, "end"=>new  UTCDateTime()]]);
-                    $c = $res->getMatchedCount();                    
-                }                
+                $res = $this->coll->updateMany(['time' => ['$lt' => ($t - $maxlifetime) ], "active" => true ], ['$inc'=>["duration"=>$t],'$set'=>["active" => false, "end"=>new  UTCDateTime()]]);
+                $c = $res->getMatchedCount();                
             } catch(Exception $ex) {
                 return false;
             }

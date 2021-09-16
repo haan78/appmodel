@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__."/helper/db.php";
 
-//db::stop("e4opta1cih9k0nk1su8k4eus15");
-//var_dump(db::stop2());
+db::session("Baris");
 
-//echo \MongoTools\MongoSession::$last;
+var_dump($_SESSION);
 
-echo time() - 60;
+session_destroy();
+unset($_SESSION);
+
+var_dump($_SESSION);

@@ -19,43 +19,14 @@ class db {
         self::mongo()->selectDatabase($db)->selectCollection($coll)->insertOne($data);
     }
 
-    public static function session() : void {
-        \MongoTools\MongoSession::init( "mongodb://root:12345@mongodb","session" );
+    public static function session(string $user_id) : void {
+        $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
+        \MongoTools\MongoSession::init( $coll,$user_id );
     }
 
-    public static function stop($id) {
-        $mt = new  \MongoDB\BSON\UTCDateTime( round(microtime(true)));
+    public static function activeUserCount(string $user_id) {
         $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
-        $coll->updateOne([ 
-            'session_id' => $id,
-            "active" => true 
-        ],
-        [
-            '$inc' => [
-                "duration"=>-1*time()
-            ],
-            '$set'=>[
-                "active" => false,
-                "end" => $mt
-            ]
-        ]);
-    }
+        return \MongoTools\MongoSession::userCount( $coll,$user_id );
 
-    public static function stop2() {
-        $mt = new  \MongoDB\BSON\UTCDateTime( round(microtime(true)));
-        $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
-        $coll->updateOne([ 
-            'expires' => ['$lt' => time() ],
-            "active" => true 
-        ],
-        [
-            '$inc' => [
-                "duration"=>-1*time()
-            ],
-            '$set'=>[
-                "active" => false,
-                "end" => $mt
-            ]
-        ]);
     }
 }
