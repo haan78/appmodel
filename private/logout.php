@@ -1,4 +1,6 @@
 <?php
-require_once __DIR__ . "/helper/user.php";
-user::kill();
-header("Refresh:0; url=/login?s=1");
+require_once __DIR__."/helper/db.php";
+
+db::session("Baris");
+
+
