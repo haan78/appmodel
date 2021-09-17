@@ -46,6 +46,7 @@ class db {
         $e = ['$expr' => [ '$lt'=> [ [ '$add'=> ['$time','$life'] ], $t ] ], "active"=>true ];
         $cursor = $coll->find($e);
         var_dump($cursor);
+        echo "<hr/>";
         foreach ($cursor as $doc) {
             echo "<pre>\n";
             var_dump($doc);
@@ -54,5 +55,6 @@ class db {
             ".($doc["time"] -($t-$doc["life"]))."
             <hr/>";
         }
+        echo "<hr/>";
     }
 }

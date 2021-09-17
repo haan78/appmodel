@@ -6,15 +6,30 @@ namespace MongoTools {
     use \SessionHandlerInterface;
     use \MongoDB\Collection;
     use \MongoDB\BSON\UTCDateTime;
-    use \MongoDB\Client;
+    use \MongoDB\BSON\ObjectId;
 
     class MongoSession implements SessionHandlerInterface {
-        private $savePath;
-        private $sessionName;
         private Collection $coll;
 
         private static bool $initialized = false;
-        private static string $USER_ID = ""; 
+        public static string $lastErrorMessage = "";
+
+        private static function getClientInfo(&$agent,&$address) : void {
+            $agent = "";
+            $address = "";
+            if ( isset($_SERVER) ) {
+                if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+                    $agent = trim($_SERVER['HTTP_USER_AGENT']);
+                }
+                if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+                    $address = trim(explode(",",$_SERVER["HTTP_X_REAL_IP"])[0]);
+                } elseif ( isset($_SERVER["HTTP_X_REAL_IP"]) ) {
+                    $address = trim($_SERVER["HTTP_X_REAL_IP"]);
+                } elseif ( isset($_SERVER["REMOTE_ADDR"]) ) {
+                    $address = trim($_SERVER["REMOTE_ADDR"]);
+                }
+            }
+        }
 
         public static function init(Collection $coll, int $lifeTime = 1 * 60) : void {
             if ( self::$initialized ) {
@@ -24,10 +39,9 @@ namespace MongoTools {
             }
             $name = $coll->getCollectionName();
             $coll->createIndexes([
-                [ "key"=>[ "time"=>1], "name"=>$name."_ind_1" ],
-                [ "key"=>[ "session_id"=>1, "active"=>1], "name"=>$name."_ind_2" ],
-                [ "key"=>[ "expires"=>1, "active"=>1 ], "name"=>$name."_ind_3" ],
-                [ "key"=>[ "user_id"=>1, "active"=>1 ], "name"=>$name."_ind_4" ]
+                [ "key"=>[ "time"=>1], "name"=>$name."_index_1" ],
+                [ "key"=>[ "expires"=>1, "active"=>1 ], "name"=>$name."_index_2" ],
+                [ "key"=>[ "user_id"=>1, "active"=>1 ], "name"=>$name."_index_3" ]
             ]);
             session_set_save_handler(new MongoSession($coll), false);
             ini_set('session.gc_maxlifetime', $lifeTime);
@@ -42,7 +56,7 @@ namespace MongoTools {
             self::getClientInfo($agent,$address);
             $session_id = session_id();
 
-            $result = $coll->findOne([ "session_id"=>$session_id, "active"=>true ],[ "sort" => ["time"=>-1] ]);
+            $result = $coll->findOne([ "active"=>true ],[ "sort" => ["time"=>-1] ]);
             if ( !is_null($result) ) {
                 if ( $result["address"] == $address ) {
                     if ( $result["agent"] == $agent ) {
@@ -67,9 +81,27 @@ namespace MongoTools {
             return $coll->count(["user_id"=>$user_id, "active"=>true]);
         }
 
-        public static function setUserID(string $user_id ) : void {
-            self::$USER_ID = $user_id;
-        }
+        public static function setUserID(Collection $coll,string $user_id) : void {
+            if ( !self::$initialized ) {
+                throw new Exception(__CLASS__."::init function must be called first" );
+            }
+            $id = session_id();
+            if ( $id === false ) {
+                throw new Exception( "session_id not found" );
+            }
+            
+            $result = $coll->updateOne([
+                "_id"=> new ObjectId($id),
+                "active"=>true
+            ],[
+                '$set'=>[
+                    "user_id" => $user_id
+                ]
+            ]);
+            if ( $result->getMatchedCount() == 0 ) {
+                throw new Exception( "Session ID not found. It may have already been deactivated." );
+            }
+        } 
 
         public function __construct(Collection $coll)
         {
@@ -90,65 +122,46 @@ namespace MongoTools {
         }
 
         public function read($id) {
-            $result = $this->coll->findOne([ "session_id"=>$id, "active"=>true ]);
-            if ( !is_null($result) && !empty($result) && $result["data"] ) {
-                return (string)$result["data"];
+            $_id = new ObjectId($id);
+            $result = $this->coll->findOne([ "_id"=> $_id, "active"=>true ]);
+            if ( !is_null($result) && !empty($result) && $result["raw"] ) {
+                return (string)$result["raw"];
             } else {
                 return "";
             }
-        }
-
-        private static function getClientInfo(&$agent,&$address) : void {
-            $agent = "";
-            $address = "";
-            if ( isset($_SERVER) ) {
-                if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
-                    $agent = trim($_SERVER['HTTP_USER_AGENT']);
-                }
-                if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-                    $address = trim(explode(",",$_SERVER["HTTP_X_REAL_IP"])[0]);
-                } elseif ( isset($_SERVER["HTTP_X_REAL_IP"]) ) {
-                    $address = trim($_SERVER["HTTP_X_REAL_IP"]);
-                } elseif ( isset($_SERVER["REMOTE_ADDR"]) ) {
-                    $address = trim($_SERVER["REMOTE_ADDR"]);
-                }
-            }
-        }   
+        }  
 
         public function write($id, $data) {
-            if ( empty($data) ) {
-                return true;
+            if ( !empty($data) ) {
+                $fields = [
+                    "raw" => $data,
+                    "data"=> isset($_SESSION) ? $_SESSION : null,
+                    "last_modified" =>new UTCDateTime(),
+                    "time"=>time(),
+                    "active" => true
+                ];         
+                try {
+                    $result = $this->coll->updateOne(["_id"=> new ObjectId($id)], [ '$set'=>$fields ]);
+                    if ( $result->getMatchedCount() > 0 ) {
+                        return true;
+                    } else {
+                        self::$lastErrorMessage = "_id ($id) not found in collection";
+                        return false;
+                    }
+                } catch(Exception $ex) {
+                    self::$lastErrorMessage = $ex->getMessage();
+                    return false;
+                }            
+            } else {
+                return $this->destroy($id);
             }
-            $fields = [
-                "session_id"=>$id,
-                "data"=>$data,
-                "last_modified" =>new UTCDateTime(),
-                "name" => $this->sessionName,
-                "time"=>time(),
-                "active"=>true
-            ]; 
-            self::getClientInfo($agent,$address);
-            $insert = [
-                "user_id"=>static::$USER_ID,
-                "life" => intval( ini_get('session.gc_maxlifetime') ),
-                "begin" => new UTCDateTime(),
-                "end" => null,
-                "duration" => (-1*time()),
-                "agent" => $agent,
-                "address" => $address
-            ];           
-            try {
-                $this->coll->updateOne(["session_id"=>$id, "active"=>true ], [ '$set'=>$fields, '$setOnInsert'=>$insert ], array("upsert"=>true));
-            } catch(Exception $ex) {
-                return false;
-            }            
-            return true;
+            
         }
 
         public function destroy($id) {
             try {
                 $this->coll->updateOne([ 
-                    'session_id' => $id,
+                    '_id' => new ObjectId($id),
                     "active" => true 
                 ],
                 [
@@ -167,11 +180,29 @@ namespace MongoTools {
         }
 
         public function create_sid() : string {
-            return uniqid(date('YmdHis')."-");
+            self::getClientInfo($agent,$address);
+            $t = time();
+            $insert = [
+                "user_id"=>null,
+                "data" => [],
+                "raw" => "",
+                "life" => intval( ini_get('session.gc_maxlifetime') ),
+                "begin" => new UTCDateTime(),
+                "last_modified" => null,
+                "end" => null,
+                "duration" => (-1*$t),
+                "time" => $t,
+                "agent" => $agent,
+                "address" => $address,
+                "active" => true
+            ];
+            $result = $this->coll->insertOne($insert);
+            return (string)$result->getInsertedId();
         }
 
-        public function validate_sid(string $anahtar): bool {
-            return true;
+        public function validate_sid(string $id): bool {
+            $c = $this->coll->count([ "_id"=>new ObjectId($id) ]);
+            return $c > 0;
         }
 
         public function gc($maxlifetime) {            
@@ -184,6 +215,7 @@ namespace MongoTools {
                 ]);
                 $c = $res->getMatchedCount();                
             } catch(Exception $ex) {
+                self::$lastErrorMessage = $ex->getMessage();
                 return false;
             }
             return $c;
