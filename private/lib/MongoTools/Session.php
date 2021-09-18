@@ -10,6 +10,7 @@ namespace MongoTools {
 
     class MongoSession implements SessionHandlerInterface {
         private Collection $coll;
+        private int $life = 0;
 
         private static bool $initialized = false;
         public static string $lastErrorMessage = "";
@@ -43,8 +44,9 @@ namespace MongoTools {
                 [ "key"=>[ "expires"=>1, "active"=>1 ], "name"=>$name."_index_2" ],
                 [ "key"=>[ "user_id"=>1, "active"=>1 ], "name"=>$name."_index_3" ]
             ]);
-            session_set_save_handler(new MongoSession($coll), false);
+            session_set_save_handler(new MongoSession($coll,$lifeTime*1000), false);
             ini_set('session.gc_maxlifetime', $lifeTime);
+            session_set_cookie_params($lifeTime);
             session_start();
             self::$initialized = true;
         }
@@ -103,16 +105,39 @@ namespace MongoTools {
             }
         } 
 
-        public function __construct(Collection $coll)
+        public function __construct(Collection $coll,int $life)
         {
             $this->coll = $coll;
+            $this->life = $life;
+        }
+
+        private function inactivate(string $id = "") : int {
+            $t = new UTCDateTime(); // '$$NOW'
+            $aggr = [
+                [ '$set' => [
+                        "duration"=>[ '$subtract'=>[ $t,'$last_modified' ] ],
+                        "active" => false,
+                        "end" => $t
+                    ]
+                ]
+            ];
+            if (!empty($id)) {
+                $result = $this->coll->updateOne([
+                    '_id' => new ObjectId($id),
+                    "active"=>true
+                ],$aggr);
+                return $result->getMatchedCount();
+            } else {
+                $result = $this->coll->updateMany(
+                    ['$expr' => [ '$lt'=> [ [ '$add'=> ['$last_modified','$life'] ], $t ] ], "active"=>true ],$aggr
+                );
+                return $result->getMatchedCount();
+            }
         }
 
         public function open($savePath, $sessionName) {
-            $this->savePath = $savePath;
-            $this->sessionName = $sessionName;
 
-            $this->gc( ini_get('session.gc_maxlifetime') );
+            $this->gc( intval(ini_get('session.gc_maxlifetime')) );
 
             return true;
         }
@@ -137,7 +162,6 @@ namespace MongoTools {
                     "raw" => $data,
                     "data"=> isset($_SESSION) ? $_SESSION : null,
                     "last_modified" =>new UTCDateTime(),
-                    "time"=>time(),
                     "active" => true
                 ];         
                 try {
@@ -145,11 +169,11 @@ namespace MongoTools {
                     if ( $result->getMatchedCount() > 0 ) {
                         return true;
                     } else {
-                        self::$lastErrorMessage = "_id ($id) not found in collection";
+                        self::$lastErrorMessage = __FUNCTION__."::"." _id ($id) not found in collection";
                         return false;
                     }
                 } catch(Exception $ex) {
-                    self::$lastErrorMessage = $ex->getMessage();
+                    self::$lastErrorMessage = __FUNCTION__.":: ".$ex->getMessage();
                     return false;
                 }            
             } else {
@@ -160,20 +184,9 @@ namespace MongoTools {
 
         public function destroy($id) {
             try {
-                $this->coll->updateOne([ 
-                    '_id' => new ObjectId($id),
-                    "active" => true 
-                ],
-                [
-                    '$inc'=>[
-                        "duration"=>time()
-                    ],
-                    '$set'=>[
-                        "active" => false,
-                        "end" => new UTCDateTime()
-                    ]
-                ]);
+                $this->inactivate($id);
             } catch(Exception $ex) {
+                self::$lastErrorMessage = __FUNCTION__.":: ".$ex->getMessage();
                 return false;
             }            
             return true;
@@ -181,17 +194,15 @@ namespace MongoTools {
 
         public function create_sid() : string {
             self::getClientInfo($agent,$address);
-            $t = time();
             $insert = [
                 "user_id"=>null,
                 "data" => [],
                 "raw" => "",
-                "life" => intval( ini_get('session.gc_maxlifetime') ),
+                "life" => $this->life,
                 "begin" => new UTCDateTime(),
                 "last_modified" => null,
                 "end" => null,
-                "duration" => (-1*$t),
-                "time" => $t,
+                "duration" => 0,
                 "agent" => $agent,
                 "address" => $address,
                 "active" => true
@@ -205,15 +216,10 @@ namespace MongoTools {
             return $c > 0;
         }
 
-        public function gc($maxlifetime) {            
-            $t = time();
+        public function gc($maxlifetime) {
             $c = 0;
             try {
-                $res = $this->coll->updateMany( ['$expr' => [ '$lt'=> [ [ '$add'=> ['$time','$life'] ], $t ] ], "active"=>true ], [
-                    '$inc'=>["duration"=>$t],
-                    '$set'=>["active" => false, "end"=>new UTCDateTime()]
-                ]);
-                $c = $res->getMatchedCount();                
+                $c = $this->inactivate();              
             } catch(Exception $ex) {
                 self::$lastErrorMessage = $ex->getMessage();
                 return false;

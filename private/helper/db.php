@@ -12,20 +12,14 @@ class db {
         return self::$mongodb;
     }
 
-    public static function log(string $db, string $coll, array $logData) {
-        $data = $logData;
-        $data["localTime"] = date("Y-m-d H:i:s");
-        $data["remoteAddr"] = ( isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : null );
-        self::mongo()->selectDatabase($db)->selectCollection($coll)->insertOne($data);
-    }
-
     public static function session() : void {
         $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
         \MongoTools\MongoSession::init( $coll );
     }
 
     public static function setUserID(string $user_id) : void {
-        \MongoTools\MongoSession::setUserID($user_id);
+        $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
+        \MongoTools\MongoSession::setUserID($coll,$user_id);
     }
 
     public static function activeUserCount(string $user_id) {
@@ -38,11 +32,19 @@ class db {
         return \MongoTools\MongoSession::clinetValidate($coll,$message);
     }
 
+    public static function log(array $data) : void {
+        $coll = self::mongo()->selectDatabase("test")->selectCollection("log");
+        $coll->insertOne([
+            "time" => new \MongoDB\BSON\UTCDateTime(),
+            "session_id" => session_id(),
+            "session_data" => (  isset($_SESSION) ? $_SESSION : null ),
+            "data" => $data
+        ]);
+    }
+
     public static function test() {
         $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
         $t = time();
-        $jsf = "function() { return this.time > $t - this.life; }";
-        $w = ['$where' => $jsf];
         $e = ['$expr' => [ '$lt'=> [ [ '$add'=> ['$time','$life'] ], $t ] ], "active"=>true ];
         $cursor = $coll->find($e);
         var_dump($cursor);
@@ -56,5 +58,29 @@ class db {
             <hr/>";
         }
         echo "<hr/>";
+    }
+
+    public static function test2(string $id = "") {
+        $coll = self::mongo()->selectDatabase("test")->selectCollection("session");
+        $aggr = [
+            [ '$set' => [
+                    "duration"=>[ '$subtract'=>[ '$$NOW','$last_modified' ] ],
+                    "active" => false,
+                    "end" => new \MongoDB\BSON\UTCDateTime()
+                ]
+            ]
+        ];
+        if (!empty($id)) {
+            $result = $coll->updateOne([
+                '_id' => new \MongoDB\BSON\ObjectId($id),
+                "active"=>true
+            ],$aggr);
+            return $result->getMatchedCount();
+        } else {
+            $result = $coll->updateMany(
+                ['$expr' => [ '$lt'=> [ [ '$add'=> ['$last_modified','$life'] ], '$$NOW' ] ], "active"=>true ],$aggr
+            );
+            return $result->getMatchedCount();
+        }
     }
 }
