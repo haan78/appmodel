@@ -58,7 +58,7 @@ namespace MongoTools {
             self::getClientInfo($agent,$address);
             $session_id = session_id();
 
-            $result = $coll->findOne([ "active"=>true ],[ "sort" => ["time"=>-1] ]);
+            $result = $coll->findOne([ "_id"=> new ObjectId($session_id), "active"=>true ],[ "sort" => ["time"=>-1] ]);
             if ( !is_null($result) ) {
                 if ( $result["address"] == $address ) {
                     if ( $result["agent"] == $agent ) {

@@ -47,10 +47,8 @@ namespace MongoTools {
 
         private static function toMongo(array $f, Bucket $bucket,string $infotext, int $ind): string
         {
-            $dt = new DateTime();
             $data = [
-                "upload_time" => UTCDateTime($dt),
-                "upload_local_time" => $dt->format("Y-m-d H:i:s"),
+                "upload_time" => new UTCDateTime(),
                 "upload_file_type" => $f["type"],
                 "upload_file_name" => $f["name"],
                 "upload_file_info_text" => $infotext,
