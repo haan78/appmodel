@@ -58,6 +58,8 @@ export default {
                 }
                 return obj;
             }
+        } else if (typeof data === "function") {
+            return this.dataTransform( data(l),l+1 );
         } else if (typeof data === "string" ) {
             var str = data.trim();
             if ( str === "" ) {
@@ -65,8 +67,8 @@ export default {
             } else {
                 return str;
             }
-        } else if (typeof data === "function") {
-            return this.dataTransform( data(l),l+1 );
+        } else if (data instanceof Date) {
+            return data.toISOString();
         } else {
             return data;
         }

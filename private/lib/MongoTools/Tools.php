@@ -59,7 +59,7 @@ namespace MongoTools {
             return $list;
         }
 
-        public static function toList(\MongoDB\Driver\Cursor $cursor, ?callable $fnc = null) {
+        public static function toList(\MongoDB\Driver\Cursor $cursor, ?callable $fnc = null) : array {
             $list = [];
             $it = new \IteratorIterator($cursor);
             $it->rewind();
@@ -78,6 +78,10 @@ namespace MongoTools {
             return $list;
         }
 
+		public static function toRegex(string $regex,string $flags = "") : \MongoDB\BSON\Regex  {
+            return new \MongoDB\BSON\Regex($regex,$flags);
+        }
+		
         public static function toObjectId(string $_id) : \MongoDB\BSON\ObjectId {
             return new \MongoDB\BSON\ObjectId( trim($_id) );
         }
