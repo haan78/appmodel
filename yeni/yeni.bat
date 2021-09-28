@@ -10,16 +10,16 @@ if "%1" == "image" goto image
 if "%1" == "bash" goto bash
 if "%1" == "kill" goto kill
 
-docker run -ti -v %CD%\app:/app -e APPNAME=%CurrDirName% -p 8080 -w / --name "%cname%" "%imgname%"1 sh /vuedef/vue_conf.sh %1
+docker run -ti -v %CD%\app:/app -v %CD%\src:/code -e APPNAME=%CurrDirName% -p 8080 -w / --name %cname% %imgname% sh /vuedef/vue_conf.sh %1
 
 goto end
 
 :bash
-docker run -ti -v %CD%\app:/app -e APPNAME=%CurrDirName% -p 8080 -w / --name "%cname%"  "%imgname%" bash
+docker run -ti -v %CD%\app:/app -e APPNAME=%CurrDirName% -p 8080 -w / --name %cname%  %imgname% bash
 goto end
 
 :image
-docker build -t "%imgname%" .
+docker build %CD% -t "%imgname%"
 goto end
 
 :kill

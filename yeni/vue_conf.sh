@@ -12,54 +12,42 @@ then
 	exit 1
 fi
 
-if [ ! -d "/app" ]
-then
-	echo "/app folder not found"
-	exit 1
-fi
-
-if [ 1 -f "/vuedef/vue.config.js.default" ]
-then
-	echo "vue.config.js.default file not dound"
-	exit 1
-fi
-
-if [ "$1" = "create" ]
-then
-	if [ -d "/app/$APPNAME" ]
-	then
-		rm -rf /app/$APPNAME
-	fi
-	mkdir /app/$APPNAME
+if [ "$1" = "init" ]
+then	
+	rm -rf /app/*	
+	cp /vuedef/vue.config.js.default /app/vue.config.js
+	cp /vuedef/package.json.default /app/package.json
+	reg='s/anewapplicationname/'$APPNAME'/g'
+	sed -i $reg /app/package.json
+	ln -sf /code /app/src	
 	cd /app
-	vue create -n "$APPNAME"
-	cp /vuedef/vue.config.js.default /app/$APPNAME/vue.config.js
+	npm install
 	exit 0
 fi
 
-if [ ! -d "/app/$APPNAME" ]
+if [ ! -f "/app/package-lock.json" ]
 then
-	echo "/app/$APPNAM folder not found. Call create command"
+	echo "/app/package-lock.json first init the project"
 	exit 1
 fi
 
 if [ "$1" = "watch" ]
 then
-	cd "/app/$APPNAME"
+	cd /app
 	npx vue-cli-service build --mode development --watch
 	exit 0
 fi
 
 if [ "$1" = "dev" ]
 then
-	cd "/app/$APPNAME"
+	cd "/app"
 	npx vue-cli-service build --mode development
 	exit 0
 fi
 
 if [ "$1" = "build" ]
 then
-	cd "/app/$APPNAME"
+	cd "/app"
 	npx vue-cli-service build --mode production
 	exit 0
 fi
