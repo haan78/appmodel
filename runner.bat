@@ -18,11 +18,11 @@ if "%2" == "bash" goto bash
 if "%2" == "kill" goto kill
 
 
-docker run -ti -v %CD%\app:/app -v %CD%\src:/code -e APPNAME=%CurrDirName% -l npmrunner --rm %1 sh /vuedef/vue_conf.sh %2
+docker run -ti -v %CD%\html:/app -e APPNAME=%CurrDirName% --rm %1 sh /vue_conf.sh %2
 goto end
 
 :bash
-docker run -ti -v %CD%\app:/app -v %CD%\src:/code -e APPNAME=%CurrDirName% -p 8080 -w /app -l npmrunner --rm %1 bash
+docker run -ti -e APPNAME=%CurrDirName% -p 8080 -w /app --rm %1 bash
 goto end
 
 :image

@@ -1,12 +1,5 @@
 #!/bin/sh
 
-if [ -z "${APPNAME}" ]
-then
-	n="$APPNAME"
-else
-	n="app_defautl"
-fi
-
 if [ -z "$1" ]
 then
 	echo "Please send a command"
@@ -14,13 +7,28 @@ then
 fi
 
 if [ "$1" = "init" ]
-then	
-	rm -rf /app/*	
-	cp /vuedef/vue.config.js.default /app/vue.config.js
-	cp /vuedef/package.json.default /app/package.json
-	reg='s/anewapplicationname/'$n'/g'
-	sed -i $reg /app/package.json
-	ln -sf /code /app/src
+then
+	if [ ! -f /app/package.json]
+	then
+		echo "/app/package.json not found please assign with docker volume"
+		exit 1
+	fi
+
+	if [ -d /app/node_modules ]
+	then
+		rm -rf /app/node_modules
+	fi
+
+	if [ -d /app/dist ]
+	then
+		rm -rf /app/dist
+	fi
+
+	if [ -f /app/package-lock.json ]
+	then
+		rm -rf /app/package-lock.json
+	fi
+	
 	cd /app
 	npm install
 	exit 0
