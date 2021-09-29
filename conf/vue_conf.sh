@@ -8,55 +8,55 @@ fi
 
 if [ "$1" = "init" ]
 then
-	if [ ! -f /app/package.json]
+	if [ ! -f /html/package.json]
 	then
-		echo "/app/package.json not found please assign with docker volume"
+		echo "/html/package.json not found"
 		exit 1
 	fi
 
-	if [ -d /app/node_modules ]
+	if [ -d /html/node_modules ]
 	then
-		rm -rf /app/node_modules
+		rm -rf /html/node_modules
 	fi
 
-	if [ -d /app/dist ]
+	if [ -d /html/dist ]
 	then
-		rm -rf /app/dist
+		rm -rf /html/dist
 	fi
 
-	if [ -f /app/package-lock.json ]
+	if [ -f /html/package-lock.json ]
 	then
-		rm -rf /app/package-lock.json
+		rm -rf /html/package-lock.json
 	fi
 	
-	cd /app
+	cd /html
 	npm install
 	exit 0
 fi
 
-if [ ! -f "/app/package-lock.json" ]
+if [ ! -f "/html/package-lock.json" ]
 then
-	echo "/app/package-lock.json first init the project"
+	echo "/html/package-lock.json first init the project"
 	exit 1
 fi
 
 if [ "$1" = "watch" ]
 then
-	cd /app
+	cd /html
 	npx vue-cli-service build --mode development --watch
 	exit 0
 fi
 
 if [ "$1" = "dev" ]
 then
-	cd /app
+	cd /html
 	npx vue-cli-service build --mode development
 	exit 0
 fi
 
 if [ "$1" = "build" ]
 then
-	cd /app
+	cd /html
 	npx vue-cli-service build --mode production
 	exit 0
 fi

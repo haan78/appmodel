@@ -51,10 +51,8 @@ export default {
     };
   },
   created() {
-    console.log(Cookie.get());
     this.message = this.$subutai.cookie("status");
     console.log(this.message);
-    console.log(Cookie.get());
   },
   methods:{
     formEnter() {

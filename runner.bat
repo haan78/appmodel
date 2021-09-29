@@ -1,42 +1,86 @@
 @echo off
 
-if not exist %CD%\src\ (
-    echo %CD%\src folder not found
+if not exist %CD%\html\ (
+    echo %CD%\html folder not found
     goto end
 )
-
-if not exist "%CD%\app" mkdir "%CD%\app"
-
 
 for %%I in (.) do set CurrDirName=%%~nxI
 
 if [%1] == [] goto help
 if [%2] == [] goto help
 
-if "%2" == "image" goto image
-if "%2" == "bash" goto bash
-if "%2" == "kill" goto kill
+if "%1" == "npm" goto npm
+if "%1" == "composer" goto composer
+if "%1" == "doit" goto doitall
 
+:npm
 
-docker run -ti -v %CD%\html:/app -e APPNAME=%CurrDirName% --rm %1 sh /vue_conf.sh %2
+if "%2" == "img" goto npmimg
+if "%2" == "bash" goto npmbash
+if "%2" == "init" goto npminit
+if "%2" == "dev" goto npmidev
+if "%2" == "build" goto npmbuild
+if "%2" == "watch" goto npmwatch
+goto help
+
+:npmimg
+docker build -t %CurrDirName%_npm_runner -f %CD%\conf\npm-runner-dockerfile .
 goto end
 
-:bash
-docker run -ti -e APPNAME=%CurrDirName% -p 8080 -w /app --rm %1 bash
+:npmbash
+docker run -ti -p 8080 -v %CD%\html:/html -w /html --rm %CurrDirName%_npm_runner bash
 goto end
 
-:image
-rem docker build -t %2 - < %CD%\conf\npm-runner-dockerfile
-docker build -t %1 -f %CD%\conf\npm-runner-dockerfile .
+:npminit
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_npm_runner sh /vue_conf.sh init
 goto end
 
-:kill
-del /s /f /q %CD%\app\
-for /f %%f in ('dir /ad /b %CD%\app\') do rd /s /q %CD%\app\%%f
-rmdir %CD%\app\
+:npmidev
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_npm_runner sh /vue_conf.sh dev
+goto end
+
+:npmbuild
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_npm_runner sh /vue_conf.sh build
+goto end
+
+:npmwatch
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_npm_runner sh /vue_conf.sh watch
+goto end
+
+:composer
+
+if "%2" == "img" goto comimg
+if "%2" == "bash" goto combash
+if "%2" == "init" goto cominit
+goto help
+
+:comimg
+docker build -t %CurrDirName%_composer_runner -f %CD%\conf\php-runner-dockerfile .
+goto end
+
+:combash
+docker run -ti -p 8080 -v %CD%\html:/html -w /html --rm %CurrDirName%_composer_runner sh
+goto end
+
+:cominit
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_composer_runner sh /composer_init.sh
+goto end
+
+:doitall
+docker build -t %CurrDirName%_composer_runner -f %CD%\conf\php-runner-dockerfile .
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_composer_runner sh /composer_init.sh
+docker build -t %CurrDirName%_npm_runner -f %CD%\conf\npm-runner-dockerfile .
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_npm_runner sh /vue_conf.sh init
+docker run -ti -v %CD%\html:/html --rm %CurrDirName%_npm_runner sh /vue_conf.sh dev
+docker compose up -d
 goto end
 
 :help
-echo runner [image name] [command]
+echo runner npm [img|bash|init|dev|build|watch]
+echo OR
+echo runner composer [img|bash|init]
+echo OR
+echo runner doitall
 
 :end

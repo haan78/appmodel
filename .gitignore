@@ -2,6 +2,12 @@
 volumes
 old
 
+html/dist
+html/node_modules
+html/package-lock.json
+html/vendor
+html/composer.lock
+
 .mongodbvol
 .mariadbvol
 .redisvol
