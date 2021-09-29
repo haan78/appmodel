@@ -4,9 +4,11 @@
   </div>
   
 </template>
-
+<style>
+@import "~element-plus/theme-chalk/index.css";
+</style>
 <script>
-import 'element-plus/lib/theme-chalk/index.css'
+//import 'element-plus/theme-chalk/index.css'
 export default {
   name: 'Main',
   created() {

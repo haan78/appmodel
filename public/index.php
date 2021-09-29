@@ -16,5 +16,5 @@ $file = "/private/$action.php";
 if (file_exists($file)) {
     include $file;
 } else {
-    die("File not found /private/$file");
+    die("File not found $file");
 }
