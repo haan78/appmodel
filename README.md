@@ -1,9 +1,17 @@
 # SUBUTAI
 
 ## Project setup
+### start docker containers
 ```
-yarn install
+docker compose up
 ```
+
+### Build project from code
+```
+
+```
+
+
 
 ### Compiles and hot-reloads for development
 ```
