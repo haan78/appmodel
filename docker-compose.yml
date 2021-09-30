@@ -23,6 +23,17 @@ services:
             - "27017"
         volumes:
             - mongodbvol:/data/db
+    redis:
+        image: redis:latest
+        environment:
+            TZ: "Asia/Istanbul"
+        volumes:
+            - "redisvol:/data:rw"
+        expose: 
+            - "6379"
+        ports:
+            - "6379:6379"
 
 volumes:
     mongodbvol:
+    redisvol:
