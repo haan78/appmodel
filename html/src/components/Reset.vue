@@ -1,5 +1,5 @@
 <template>
-    <el-button @click="test()">Test</el-button>
+    <el-button @click="test()">Test 33</el-button>
     <el-button @click="test2()">Test2 - Veyeni</el-button>
 </template>
 <script>

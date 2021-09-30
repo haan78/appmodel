@@ -1,7 +1,0 @@
-FROM node:16.9.1
-COPY ./conf/vue_conf.sh /vue_conf.sh
-
-RUN npm update -g
-##RUN npm install --global yarn
-RUN npm install -g @vue/cli
-

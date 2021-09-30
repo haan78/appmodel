@@ -1,30 +1,16 @@
 version: "3.8"
         
 services:
-    nginx:
-        image: nginx:latest
-        environment:
-            TZ: "Asia/Istanbul"
-        depends_on:
-            - phpfpm 
+    php:
+        build:
+            context: ./conf
+            dockerfile: project-dockerfile
         volumes:
-            - "./conf/nginx-default.conf:/etc/nginx/conf.d/default.conf"
-            - "./volumes/log/nginx:/var/log/nginx:rw"
-            - "./html/dist:/www:consistent"
+            - "./html:/html:consistent"
         ports:
             - target: 80
               published: 8001
               mode: host
-    phpfpm:
-        build:
-            context: ./conf
-            dockerfile: php-fpm-dockerfile
-        volumes:
-            - "./html/cgi:/cgi:consistent"
-            - "./html/vendor:/vendor"
-            - "./conf/settings.development.php:/etc/settings.php"
-        ports:
-            - "9000:9000"
     mongodb:
         image: mongo:latest
         environment:
