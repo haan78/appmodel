@@ -43,7 +43,7 @@ then
     then
         cleardir composer
         composer install
-    elif [ "$2" = "require " ]
+    elif [ "$2" = "require" ]
     then
         composer require $3
     else
