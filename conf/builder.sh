@@ -69,48 +69,14 @@ then
     elif [ "$2" = "watch" ]
     then
         npx vue-cli-service build --mode development --watch
+    elif [ "$2" = "run" ]
+    then
+        npm run $3
     else
         error "Unknown command : builder npm [$2]"
     fi
-elif [ "$1" = "all" ]
-then
-    if [ "$2" = "install" ]
-    then
-        if [ -f /html/composer.json ]
-        then
-            cleardir composer
-            composer install
-        fi
-
-        if [ -f /html/package.json ]
-        then
-            cleardir npm
-	        npm install
-        fi
-
-        if [ "$3" = "build" ]
-        then
-            npx vue-cli-service build --mode production
-        elif [ "$3" = "dev" ]
-        then
-            npx vue-cli-service build --mode development
-        elif [ "$3" = "watch" ]
-        then
-            npx vue-cli-service build --mode development --watch
-        fi
-    else
-        error "Unknown command : builder all [$2]"
-    fi
-elif [ "$1" == "run" ]
-then
-    ##umarim gerek kalmaz
-    if [ ! -d /html/dist ]
-    then
-        mkdir /html/dist
-        echo "<?php phpinfo(); " > /html/dist/index.php
-    fi
-    /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-
+else
+    error "Unknown command : builder [$2]"
 fi
 
 exit 0

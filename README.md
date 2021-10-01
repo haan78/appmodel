@@ -6,27 +6,21 @@
 docker compose up
 ```
 
-### Build project from code
+### Install project webpack and node modules
+```
+project npm install
 ```
 
-```
+## Use composer and npm via container
 
+### Install project composer dependicies
+```
+project composer install
+```
+### Add composer dependicie in to project
+project composer requier [package name]
 
-
-### Compiles and hot-reloads for development
+### Run npm script into container
 ```
-yarn serve
+project npm run [script name]
 ```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
