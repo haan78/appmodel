@@ -21,14 +21,14 @@ project composer install
 or
 docker exec -ti [container id] sh /builder.js composer install
 ```
-### Add composer dependicie in to project
+### Add composer package via container
 ```
 project composer requier [package name]
 or
 docker exec -ti [container id] sh /builder.js composer requier [package name]
 ```
 
-### Run npm script into container
+### Run npm script via container
 ```
 project npm run [script name]
 or
