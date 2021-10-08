@@ -1,3 +1,0 @@
-<template>
-    Pass Change
-</template>

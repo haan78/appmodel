@@ -64,7 +64,7 @@ namespace Web {
                 $arr = explode(".",$s);
                 $ext = ( count($arr)>1 ? strtolower( end($arr) ) : "" );
                 if ( $ext == "js" ) {
-                    $html_js .= "<script src=\"$s$rnd\"></script>";
+                    $html_js .= "<script src=\"$s$rnd\" type=\"module\"  ></script>";
                 } elseif ( $ext == "css" ) {
                     $html_css .= "<link rel=\"stylesheet\" href=\"$s$rnd\" />";
                 }
@@ -74,7 +74,13 @@ namespace Web {
 
         private static function data(string $cookie_name,array $data) {
             if ( !empty($data) ) {
-                setcookie($cookie_name, json_encode( $data), time()+static::$time); 
+                $op = array (
+                    'expires' => time() +static::$time,
+                    'path' => '/',                    
+                    'secure' => true,
+                    'samesite' => 'None' // None || Lax  || Strict
+                );
+                setcookie($cookie_name, json_encode( $data), $op); 
             }  else {
                 if ( isset( $_COOKIE[$cookie_name] ) ) {
                     setcookie($cookie_name, "", time() - static::$time, "/");

@@ -1,11 +1,11 @@
 <template>
   <div>
-    <el-button type="success">Selam</el-button>
+    <el-button type="success" icon="el-icon-check">Selam</el-button>
   </div>
   
 </template>
 <style>
-@import "~element-plus/theme-chalk/index.css";
+@import "element-plus/theme-chalk/index.css";
 </style>
 <script>
 //import 'element-plus/theme-chalk/index.css'
